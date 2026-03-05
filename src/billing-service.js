@@ -304,3 +304,8 @@ export async function getBillingSummary({ user, env = process.env }) {
     transactions: userTransactions
   };
 }
+
+export async function hasPaidBillingHistory({ user, env = process.env }) {
+  const store = await loadBillingStore(env);
+  return store.payments.some((payment) => payment.userId === user.id && payment.status === "paid");
+}

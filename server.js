@@ -17,6 +17,7 @@ import {
   confirmCheckout,
   getBillingSummary
 } from "./src/billing-service.js";
+import { getAdPlacement } from "./src/ad-service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -110,6 +111,19 @@ function validateAnalyzeRequestBody(body) {
 
 async function requireAuthenticatedUser(req) {
   const result = await getMe(req.headers.authorization);
+  return result.user;
+}
+
+async function getOptionalAuthenticatedUser(req) {
+  const authorization = typeof req.headers.authorization === "string"
+    ? req.headers.authorization.trim()
+    : "";
+
+  if (!authorization) {
+    return null;
+  }
+
+  const result = await getMe(authorization);
   return result.user;
 }
 
@@ -241,6 +255,20 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         ok: true,
         data: result
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/ads/placement") {
+      const user = await getOptionalAuthenticatedUser(req);
+      const placement = await getAdPlacement({
+        surface: url.searchParams.get("surface"),
+        user
+      });
+
+      sendJson(res, 200, {
+        ok: true,
+        data: placement
       });
       return;
     }

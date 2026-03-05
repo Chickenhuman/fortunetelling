@@ -9,7 +9,8 @@
 - 분석 UX: 일시적 실패 시 자동 재시도 + 수동 재시도 버튼 제공
 - 히스토리 UI: 저장된 분석 목록/상세 조회
 - 결제 UI: 크레딧 요금제 선택, 결제(mock checkout/confirm), 지갑/결제내역/거래내역 조회
-- 백엔드: 분석/인증/히스토리/결제 API 제공
+- 광고 UI: 입력/결과/히스토리/결제 화면 광고 슬롯 + 무료/유료(결제 사용자) 분기
+- 백엔드: 분석/인증/히스토리/결제/광고 API 제공
 - AI 제공자: `OpenAI` 우선, `mock` 제공자 포함(멀티모델 확장 구조)
 - 사주 엔진: `@fullstackfamily/manseryeok` 기반(지원 입력 연도: `1900~2050`)
 - 개인정보 정책: 서버 코드에서 요청 원문 저장/로그 금지
@@ -203,6 +204,40 @@ Authorization: Bearer <accessToken>
 설명:
 - 내 지갑(보유 크레딧), 결제 내역, 크레딧 거래 내역을 조회합니다.
 
+### `GET /api/ads/placement?surface=result`
+설명:
+- 광고 노출 정책과 슬롯 크리에이티브를 조회합니다.
+- `Authorization` 헤더가 없으면 게스트 정책, 있으면 사용자 등급(무료/유료)에 따라 응답됩니다.
+
+쿼리:
+- `surface`: `input | result | history | billing` (기본값 `result`)
+
+응답 예시:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "tier": "free",
+    "surface": "result",
+    "policy": {
+      "showAds": true,
+      "reason": "FREE_USER_POLICY",
+      "refreshIntervalSec": 90
+    },
+    "creative": {
+      "network": "house",
+      "slotId": "result_inline_banner",
+      "label": "광고",
+      "headline": "정밀 리포트는 크레딧으로 확장",
+      "body": "종합 리포트 외에도 일/월/연 흐름을 더 자주 확인해보세요.",
+      "ctaLabel": "크레딧 충전하러 가기",
+      "ctaUrl": "/"
+    }
+  }
+}
+```
+
 오류 응답(표준):
 
 ```json
@@ -223,6 +258,7 @@ Authorization: Bearer <accessToken>
 ├── server.js
 └── src
     ├── auth-service.js
+    ├── ad-service.js
     ├── errors.js
     ├── billing-service.js
     ├── fortune-service.js

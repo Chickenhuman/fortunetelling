@@ -452,6 +452,48 @@
             color: var(--text-sub);
         }
 
+        .ad-slot {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px dashed #ffc4b7;
+            background: #fff7f4;
+        }
+
+        .ad-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #c75643;
+            background: #ffe6df;
+            border-radius: 999px;
+            padding: 3px 8px;
+        }
+
+        .ad-title {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .ad-body {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        .ad-cta {
+            margin-top: 10px;
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #c75643;
+            text-decoration: underline;
+        }
+
         .history-list {
             display: flex;
             flex-direction: column;
@@ -695,6 +737,13 @@
             </div>
         </div>
 
+        <div id="input-ad-slot" class="ad-slot" hidden>
+            <span id="input-ad-label" class="ad-label">광고</span>
+            <p id="input-ad-title" class="ad-title"></p>
+            <p id="input-ad-body" class="ad-body"></p>
+            <a id="input-ad-cta" class="ad-cta" href="/" target="_blank" rel="noopener noreferrer"></a>
+        </div>
+
         <div class="input-group">
             <label for="name">이름</label>
             <input type="text" id="name" placeholder="이름을 입력하세요">
@@ -822,6 +871,12 @@
             <button id="result-history-btn" class="secondary-btn" type="button" hidden>내 히스토리 보기</button>
             <button id="result-billing-btn" class="secondary-btn" type="button" hidden>크레딧 충전</button>
         </div>
+        <div id="result-ad-slot" class="ad-slot" hidden>
+            <span id="result-ad-label" class="ad-label">광고</span>
+            <p id="result-ad-title" class="ad-title"></p>
+            <p id="result-ad-body" class="ad-body"></p>
+            <a id="result-ad-cta" class="ad-cta" href="/" target="_blank" rel="noopener noreferrer"></a>
+        </div>
         <button id="back-btn" class="back-btn">다시 입력하기</button>
     </section>
 
@@ -846,6 +901,12 @@
 
         <div class="history-action-row">
             <button id="history-refresh-btn" class="secondary-btn" type="button">목록 새로고침</button>
+        </div>
+        <div id="history-ad-slot" class="ad-slot" hidden>
+            <span id="history-ad-label" class="ad-label">광고</span>
+            <p id="history-ad-title" class="ad-title"></p>
+            <p id="history-ad-body" class="ad-body"></p>
+            <a id="history-ad-cta" class="ad-cta" href="/" target="_blank" rel="noopener noreferrer"></a>
         </div>
         <button id="history-back-btn" class="back-btn" type="button">뒤로 가기</button>
     </section>
@@ -877,6 +938,13 @@
         <div class="billing-record-wrap">
             <h3>최근 크레딧 거래</h3>
             <div id="billing-transactions" class="billing-record-list"></div>
+        </div>
+
+        <div id="billing-ad-slot" class="ad-slot" hidden>
+            <span id="billing-ad-label" class="ad-label">광고</span>
+            <p id="billing-ad-title" class="ad-title"></p>
+            <p id="billing-ad-body" class="ad-body"></p>
+            <a id="billing-ad-cta" class="ad-cta" href="/" target="_blank" rel="noopener noreferrer"></a>
         </div>
 
         <button id="billing-back-btn" class="back-btn" type="button">뒤로 가기</button>
@@ -919,6 +987,9 @@
             selectedPlanId: '',
             summary: null,
             isProcessingPurchase: false
+        },
+        ads: {
+            placements: {}
         }
     };
 
@@ -975,6 +1046,36 @@
     const billingPayments = document.getElementById('billing-payments');
     const billingTransactions = document.getElementById('billing-transactions');
     const billingBackBtn = document.getElementById('billing-back-btn');
+    const adSlots = {
+        input: {
+            container: document.getElementById('input-ad-slot'),
+            label: document.getElementById('input-ad-label'),
+            title: document.getElementById('input-ad-title'),
+            body: document.getElementById('input-ad-body'),
+            cta: document.getElementById('input-ad-cta')
+        },
+        result: {
+            container: document.getElementById('result-ad-slot'),
+            label: document.getElementById('result-ad-label'),
+            title: document.getElementById('result-ad-title'),
+            body: document.getElementById('result-ad-body'),
+            cta: document.getElementById('result-ad-cta')
+        },
+        history: {
+            container: document.getElementById('history-ad-slot'),
+            label: document.getElementById('history-ad-label'),
+            title: document.getElementById('history-ad-title'),
+            body: document.getElementById('history-ad-body'),
+            cta: document.getElementById('history-ad-cta')
+        },
+        billing: {
+            container: document.getElementById('billing-ad-slot'),
+            label: document.getElementById('billing-ad-label'),
+            title: document.getElementById('billing-ad-title'),
+            body: document.getElementById('billing-ad-body'),
+            cta: document.getElementById('billing-ad-cta')
+        }
+    };
 
     function getSelectedValue(name) {
         const selected = document.querySelector(`input[name="${name}"]:checked`);
@@ -1287,6 +1388,58 @@
         return payload.data;
     }
 
+    function hideAdSlot(surface) {
+        const slot = adSlots[surface];
+        if (!slot || !slot.container) {
+            return;
+        }
+        slot.container.hidden = true;
+    }
+
+    function renderAdPlacement(surface, placement) {
+        const slot = adSlots[surface];
+        if (!slot || !slot.container) {
+            return;
+        }
+
+        const hasCreative = Boolean(
+            placement
+            && placement.policy
+            && placement.policy.showAds
+            && placement.creative
+        );
+
+        if (!hasCreative) {
+            hideAdSlot(surface);
+            return;
+        }
+
+        const creative = placement.creative;
+        slot.label.textContent = creative.label || '광고';
+        slot.title.textContent = creative.headline || '';
+        slot.body.textContent = creative.body || '';
+        slot.cta.textContent = creative.ctaLabel || '자세히 보기';
+        slot.cta.href = creative.ctaUrl || '/';
+        slot.container.hidden = false;
+    }
+
+    async function loadAdPlacement(surface) {
+        try {
+            const placement = await requestJson(`/api/ads/placement?surface=${encodeURIComponent(surface)}`, {
+                authToken: state.auth.token || ''
+            });
+            state.ads.placements[surface] = placement;
+            renderAdPlacement(surface, placement);
+        } catch {
+            state.ads.placements[surface] = null;
+            hideAdSlot(surface);
+        }
+    }
+
+    async function refreshAdPlacements(surfaces = ['input', 'result', 'history', 'billing']) {
+        await Promise.all(surfaces.map(surface => loadAdPlacement(surface)));
+    }
+
     function getSelectedBillingPlan() {
         return state.billing.plans.find(plan => plan.id === state.billing.selectedPlanId) || null;
     }
@@ -1564,6 +1717,7 @@
         clearBillingState();
         localStorage.removeItem(AUTH_STORAGE_KEY);
         renderAuthState();
+        void refreshAdPlacements();
     }
 
     async function initializeAuth() {
@@ -1592,6 +1746,7 @@
         }
 
         renderAuthState();
+        await refreshAdPlacements(['input', 'result']);
     }
 
     async function handleAuthSubmit() {
@@ -1629,6 +1784,7 @@
                 clearBillingState();
             }
             renderAuthState();
+            await refreshAdPlacements();
         } catch (error) {
             setAuthError(error.message || '인증 요청에 실패했습니다.');
         } finally {
@@ -1892,6 +2048,7 @@
         state.previousSectionId = originSectionId || 'input-section';
         setActiveSection('history-section');
         window.scrollTo(0, 0);
+        await loadAdPlacement('history');
         await loadHistoryList();
     }
 
@@ -1956,6 +2113,7 @@
             });
 
             await refreshBillingSummary();
+            await refreshAdPlacements();
 
             if (confirmed.alreadyPaid) {
                 setBillingSuccess('이미 완료된 결제입니다. 지갑 상태를 새로고침했습니다.');
@@ -1979,6 +2137,7 @@
         state.previousSectionId = originSectionId || 'input-section';
         setActiveSection('billing-section');
         window.scrollTo(0, 0);
+        await loadAdPlacement('billing');
         await loadBillingScreenData();
     }
 
