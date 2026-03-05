@@ -435,6 +435,17 @@
             gap: 8px;
         }
 
+        .auth-actions + .auth-actions {
+            margin-top: 8px;
+        }
+
+        .billing-credit-line {
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #c75643;
+            font-weight: 700;
+        }
+
         .history-save-status {
             margin-top: 10px;
             font-size: 12px;
@@ -507,6 +518,117 @@
             margin-top: 14px;
         }
 
+        .billing-error {
+            margin-top: 10px;
+            color: var(--danger-color);
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 18px;
+        }
+
+        .billing-success {
+            margin-top: 6px;
+            color: #18794e;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 18px;
+        }
+
+        .wallet-card {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #ffd7ce;
+            background: #fff5f2;
+        }
+
+        .wallet-label {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .wallet-credits {
+            margin-top: 4px;
+            font-size: 22px;
+            font-weight: 800;
+            color: #c75643;
+        }
+
+        .wallet-meta {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .billing-plan-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .billing-plan-item {
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--card-bg);
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .billing-plan-item.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(255, 126, 103, 0.15);
+        }
+
+        .billing-plan-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .billing-plan-meta {
+            margin-top: 4px;
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .billing-record-wrap {
+            margin-top: 16px;
+        }
+
+        .billing-record-wrap h3 {
+            font-size: 14px;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .billing-record-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .billing-record-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-bg);
+            padding: 10px 12px;
+        }
+
+        .billing-record-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .billing-record-meta {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
         .back-btn {
             background: none;
             border: none;
@@ -562,8 +684,12 @@
 
             <div id="auth-logged-in" hidden>
                 <p id="auth-user-line" class="auth-user-line"></p>
+                <p id="billing-credit-line" class="billing-credit-line">보유 크레딧: 조회 중...</p>
                 <div class="auth-actions">
                     <button id="history-open-btn" class="secondary-btn" type="button">내 히스토리</button>
+                    <button id="billing-open-btn" class="secondary-btn" type="button">크레딧 충전</button>
+                </div>
+                <div class="auth-actions">
                     <button id="auth-logout-btn" class="secondary-btn" type="button">로그아웃</button>
                 </div>
             </div>
@@ -694,6 +820,7 @@
 
         <div class="history-action-row">
             <button id="result-history-btn" class="secondary-btn" type="button" hidden>내 히스토리 보기</button>
+            <button id="result-billing-btn" class="secondary-btn" type="button" hidden>크레딧 충전</button>
         </div>
         <button id="back-btn" class="back-btn">다시 입력하기</button>
     </section>
@@ -721,6 +848,38 @@
             <button id="history-refresh-btn" class="secondary-btn" type="button">목록 새로고침</button>
         </div>
         <button id="history-back-btn" class="back-btn" type="button">뒤로 가기</button>
+    </section>
+
+    <section id="billing-section" class="section">
+        <div class="title-area">
+            <h2>크레딧 충전</h2>
+            <p>원하는 요금제를 선택하고 크레딧을 충전하세요.</p>
+        </div>
+
+        <p id="billing-error" class="billing-error"></p>
+        <p id="billing-success" class="billing-success"></p>
+        <div id="billing-loading" class="loading" hidden>결제 정보를 불러오는 중입니다...</div>
+
+        <div class="wallet-card">
+            <p class="wallet-label">내 지갑</p>
+            <p id="billing-wallet-credits" class="wallet-credits">-</p>
+            <p id="billing-wallet-updated" class="wallet-meta"></p>
+        </div>
+
+        <div id="billing-plans" class="billing-plan-list"></div>
+        <button id="billing-purchase-btn" class="submit-btn" type="button">선택한 요금제로 결제</button>
+
+        <div class="billing-record-wrap">
+            <h3>최근 결제 내역</h3>
+            <div id="billing-payments" class="billing-record-list"></div>
+        </div>
+
+        <div class="billing-record-wrap">
+            <h3>최근 크레딧 거래</h3>
+            <div id="billing-transactions" class="billing-record-list"></div>
+        </div>
+
+        <button id="billing-back-btn" class="back-btn" type="button">뒤로 가기</button>
     </section>
 </div>
 
@@ -754,12 +913,19 @@
         history: {
             items: [],
             selectedId: ''
+        },
+        billing: {
+            plans: [],
+            selectedPlanId: '',
+            summary: null,
+            isProcessingPurchase: false
         }
     };
 
     const inputSection = document.getElementById('input-section');
     const resultSection = document.getElementById('result-section');
     const historySection = document.getElementById('history-section');
+    const billingSection = document.getElementById('billing-section');
 
     const analyzeBtn = document.getElementById('analyze-btn');
     const inputError = document.getElementById('input-error');
@@ -771,6 +937,7 @@
     const providerTag = document.getElementById('provider-tag');
     const historySaveStatus = document.getElementById('history-save-status');
     const resultHistoryBtn = document.getElementById('result-history-btn');
+    const resultBillingBtn = document.getElementById('result-billing-btn');
 
     const authLoggedOut = document.getElementById('auth-logged-out');
     const authLoggedIn = document.getElementById('auth-logged-in');
@@ -782,8 +949,10 @@
     const authSubmitBtn = document.getElementById('auth-submit-btn');
     const authModeButtons = document.querySelectorAll('[data-auth-mode]');
     const authUserLine = document.getElementById('auth-user-line');
+    const billingCreditLine = document.getElementById('billing-credit-line');
     const authLogoutBtn = document.getElementById('auth-logout-btn');
     const historyOpenBtn = document.getElementById('history-open-btn');
+    const billingOpenBtn = document.getElementById('billing-open-btn');
 
     const historyError = document.getElementById('history-error');
     const historyLoading = document.getElementById('history-loading');
@@ -795,6 +964,17 @@
     const historyDetailContent = document.getElementById('history-detail-content');
     const historyRefreshBtn = document.getElementById('history-refresh-btn');
     const historyBackBtn = document.getElementById('history-back-btn');
+
+    const billingError = document.getElementById('billing-error');
+    const billingSuccess = document.getElementById('billing-success');
+    const billingLoading = document.getElementById('billing-loading');
+    const billingWalletCredits = document.getElementById('billing-wallet-credits');
+    const billingWalletUpdated = document.getElementById('billing-wallet-updated');
+    const billingPlans = document.getElementById('billing-plans');
+    const billingPurchaseBtn = document.getElementById('billing-purchase-btn');
+    const billingPayments = document.getElementById('billing-payments');
+    const billingTransactions = document.getElementById('billing-transactions');
+    const billingBackBtn = document.getElementById('billing-back-btn');
 
     function getSelectedValue(name) {
         const selected = document.querySelector(`input[name="${name}"]:checked`);
@@ -834,6 +1014,14 @@
         });
     }
 
+    function formatKrw(value) {
+        const amount = Number(value);
+        if (!Number.isFinite(amount)) {
+            return '-';
+        }
+        return `${amount.toLocaleString('ko-KR')}원`;
+    }
+
     function setActiveSection(sectionId) {
         document.querySelectorAll('.section').forEach(section => {
             section.classList.toggle('active', section.id === sectionId);
@@ -868,6 +1056,21 @@
         historyLoading.hidden = !show;
         if (message) {
             historyLoading.textContent = message;
+        }
+    }
+
+    function setBillingError(message) {
+        billingError.textContent = message || '';
+    }
+
+    function setBillingSuccess(message) {
+        billingSuccess.textContent = message || '';
+    }
+
+    function setBillingLoading(show, message = '') {
+        billingLoading.hidden = !show;
+        if (message) {
+            billingLoading.textContent = message;
         }
     }
 
@@ -1084,6 +1287,204 @@
         return payload.data;
     }
 
+    function getSelectedBillingPlan() {
+        return state.billing.plans.find(plan => plan.id === state.billing.selectedPlanId) || null;
+    }
+
+    function updateBillingCreditLine() {
+        if (!state.auth.token) {
+            billingCreditLine.textContent = '';
+            return;
+        }
+
+        const credits = state.billing.summary && state.billing.summary.wallet
+            ? state.billing.summary.wallet.credits
+            : null;
+
+        if (typeof credits === 'number') {
+            billingCreditLine.textContent = `보유 크레딧: ${credits.toLocaleString('ko-KR')}C`;
+            return;
+        }
+
+        billingCreditLine.textContent = '보유 크레딧: 조회 중...';
+    }
+
+    function highlightSelectedBillingPlan() {
+        billingPlans.querySelectorAll('[data-plan-id]').forEach(button => {
+            button.classList.toggle('active', button.dataset.planId === state.billing.selectedPlanId);
+        });
+    }
+
+    function updateBillingPurchaseButton() {
+        const selectedPlan = getSelectedBillingPlan();
+        const needsLogin = !state.auth.token;
+
+        if (state.billing.isProcessingPurchase) {
+            billingPurchaseBtn.disabled = true;
+            billingPurchaseBtn.textContent = '결제 처리 중...';
+            return;
+        }
+
+        if (needsLogin) {
+            billingPurchaseBtn.disabled = true;
+            billingPurchaseBtn.textContent = '로그인 후 결제 가능';
+            return;
+        }
+
+        if (!selectedPlan) {
+            billingPurchaseBtn.disabled = true;
+            billingPurchaseBtn.textContent = '요금제를 선택해주세요';
+            return;
+        }
+
+        billingPurchaseBtn.disabled = false;
+        billingPurchaseBtn.textContent = `${selectedPlan.title} (${formatKrw(selectedPlan.priceKrw)}) 결제`;
+    }
+
+    function renderBillingPlans(plans) {
+        billingPlans.innerHTML = '';
+
+        if (!plans.length) {
+            billingPlans.innerHTML = '<p class="loading">현재 결제 가능한 요금제가 없습니다.</p>';
+            updateBillingPurchaseButton();
+            return;
+        }
+
+        plans.forEach(plan => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'billing-plan-item';
+            button.dataset.planId = plan.id;
+            button.innerHTML = `
+                <p class="billing-plan-title">${escapeHtml(plan.title)}</p>
+                <p class="billing-plan-meta">${escapeHtml(String(plan.credits))}크레딧 · ${escapeHtml(formatKrw(plan.priceKrw))}</p>
+            `;
+            billingPlans.appendChild(button);
+        });
+
+        highlightSelectedBillingPlan();
+        updateBillingPurchaseButton();
+    }
+
+    function renderBillingRecords(container, items, mapToMarkup) {
+        container.innerHTML = '';
+
+        if (!items.length) {
+            container.innerHTML = '<p class="loading">내역이 없습니다.</p>';
+            return;
+        }
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'billing-record-item';
+            card.innerHTML = mapToMarkup(item);
+            container.appendChild(card);
+        });
+    }
+
+    function renderBillingSummary(summary) {
+        state.billing.summary = summary || null;
+
+        const wallet = state.billing.summary && state.billing.summary.wallet
+            ? state.billing.summary.wallet
+            : null;
+        const credits = wallet && typeof wallet.credits === 'number' ? wallet.credits : 0;
+
+        billingWalletCredits.textContent = `${credits.toLocaleString('ko-KR')}C`;
+        billingWalletUpdated.textContent = wallet && wallet.updatedAt
+            ? `최근 업데이트: ${formatDateTime(wallet.updatedAt)}`
+            : '최근 업데이트 정보 없음';
+
+        const payments = state.billing.summary && Array.isArray(state.billing.summary.payments)
+            ? state.billing.summary.payments
+            : [];
+        renderBillingRecords(
+            billingPayments,
+            payments,
+            payment => `
+                <p class="billing-record-title">${escapeHtml(payment.planTitle || '-')} · ${escapeHtml(payment.status === 'paid' ? '결제 완료' : '결제 생성')}</p>
+                <p class="billing-record-meta">${escapeHtml(formatKrw(payment.amountKrw))} · ${escapeHtml(formatDateTime(payment.createdAt))}</p>
+            `
+        );
+
+        const transactions = state.billing.summary && Array.isArray(state.billing.summary.transactions)
+            ? state.billing.summary.transactions
+            : [];
+        renderBillingRecords(
+            billingTransactions,
+            transactions,
+            transaction => `
+                <p class="billing-record-title">${escapeHtml(transaction.reason || '-')}</p>
+                <p class="billing-record-meta">${escapeHtml(String(transaction.creditsDelta))}C · ${escapeHtml(formatDateTime(transaction.createdAt))}</p>
+            `
+        );
+
+        updateBillingCreditLine();
+    }
+
+    function clearBillingState() {
+        state.billing.plans = [];
+        state.billing.selectedPlanId = '';
+        state.billing.summary = null;
+        state.billing.isProcessingPurchase = false;
+
+        billingWalletCredits.textContent = '-';
+        billingWalletUpdated.textContent = '';
+        billingPlans.innerHTML = '';
+        billingPayments.innerHTML = '';
+        billingTransactions.innerHTML = '';
+        setBillingError('');
+        setBillingSuccess('');
+        setBillingLoading(false);
+        updateBillingCreditLine();
+        updateBillingPurchaseButton();
+    }
+
+    async function refreshBillingSummary() {
+        if (!state.auth.token) {
+            clearBillingState();
+            return;
+        }
+
+        const summary = await requestJson('/api/billing/me', {
+            authToken: state.auth.token
+        });
+        renderBillingSummary(summary);
+    }
+
+    async function loadBillingScreenData() {
+        if (!state.auth.token) {
+            setBillingError('결제 기능은 로그인 후 이용할 수 있습니다.');
+            return;
+        }
+
+        setBillingError('');
+        setBillingSuccess('');
+        setBillingLoading(true, '결제 정보를 불러오는 중입니다...');
+
+        try {
+            const [plansResponse, summary] = await Promise.all([
+                requestJson('/api/billing/plans'),
+                requestJson('/api/billing/me', { authToken: state.auth.token })
+            ]);
+
+            state.billing.plans = Array.isArray(plansResponse.plans) ? plansResponse.plans : [];
+
+            const hasSelected = state.billing.plans.some(plan => plan.id === state.billing.selectedPlanId);
+            if (!hasSelected) {
+                state.billing.selectedPlanId = state.billing.plans.length ? state.billing.plans[0].id : '';
+            }
+
+            renderBillingPlans(state.billing.plans);
+            renderBillingSummary(summary);
+        } catch (error) {
+            setBillingError(error.message || '결제 정보를 불러오지 못했습니다.');
+        } finally {
+            setBillingLoading(false);
+            updateBillingPurchaseButton();
+        }
+    }
+
     function saveAuthToStorage() {
         if (!state.auth.token || !state.auth.user) {
             localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -1133,6 +1534,9 @@
         authLoggedOut.hidden = isLoggedIn;
         authLoggedIn.hidden = !isLoggedIn;
         resultHistoryBtn.hidden = !isLoggedIn;
+        resultBillingBtn.hidden = !isLoggedIn;
+        updateBillingCreditLine();
+        updateBillingPurchaseButton();
 
         if (isLoggedIn) {
             authUserLine.textContent = `${state.auth.user.displayName} (${state.auth.user.email})`;
@@ -1146,6 +1550,9 @@
         if (historySection.classList.contains('active')) {
             setActiveSection('input-section');
         }
+        if (billingSection.classList.contains('active')) {
+            setActiveSection('input-section');
+        }
     }
 
     function clearAuthState() {
@@ -1154,6 +1561,7 @@
         state.history.items = [];
         state.history.selectedId = '';
         state.lastSavedHistoryId = '';
+        clearBillingState();
         localStorage.removeItem(AUTH_STORAGE_KEY);
         renderAuthState();
     }
@@ -1172,6 +1580,11 @@
                 authToken: stored.token
             });
             state.auth.user = me.user;
+            try {
+                await refreshBillingSummary();
+            } catch {
+                clearBillingState();
+            }
             saveAuthToStorage();
         } catch {
             clearAuthState();
@@ -1210,6 +1623,11 @@
             saveAuthToStorage();
             authPasswordInput.value = '';
             setAuthError('');
+            try {
+                await refreshBillingSummary();
+            } catch {
+                clearBillingState();
+            }
             renderAuthState();
         } catch (error) {
             setAuthError(error.message || '인증 요청에 실패했습니다.');
@@ -1482,6 +1900,93 @@
         window.scrollTo(0, 0);
     }
 
+    function selectBillingPlan(planId) {
+        const selected = state.billing.plans.find(plan => plan.id === planId);
+        if (!selected) {
+            return;
+        }
+
+        state.billing.selectedPlanId = selected.id;
+        highlightSelectedBillingPlan();
+        setBillingSuccess('');
+        updateBillingPurchaseButton();
+    }
+
+    async function handleBillingPurchase() {
+        if (!state.auth.token) {
+            setBillingError('결제 기능은 로그인 후 이용할 수 있습니다.');
+            return;
+        }
+
+        const selectedPlan = getSelectedBillingPlan();
+        if (!selectedPlan) {
+            setBillingError('결제할 요금제를 선택해주세요.');
+            return;
+        }
+
+        setBillingError('');
+        setBillingSuccess('');
+        state.billing.isProcessingPurchase = true;
+        updateBillingPurchaseButton();
+
+        try {
+            const checkout = await requestJson('/api/billing/checkout', {
+                method: 'POST',
+                authToken: state.auth.token,
+                body: {
+                    planId: selectedPlan.id
+                }
+            });
+
+            const paymentId = checkout && checkout.payment ? checkout.payment.id : '';
+            if (!paymentId) {
+                throw createClientError({
+                    message: '결제 정보를 확인할 수 없습니다.',
+                    code: 'INVALID_CHECKOUT_RESPONSE',
+                    retryable: false
+                });
+            }
+
+            const confirmed = await requestJson('/api/billing/checkout/confirm', {
+                method: 'POST',
+                authToken: state.auth.token,
+                body: {
+                    paymentId
+                }
+            });
+
+            await refreshBillingSummary();
+
+            if (confirmed.alreadyPaid) {
+                setBillingSuccess('이미 완료된 결제입니다. 지갑 상태를 새로고침했습니다.');
+            } else {
+                setBillingSuccess(`${selectedPlan.title} 결제가 완료되었습니다. +${selectedPlan.credits}C`);
+            }
+        } catch (error) {
+            setBillingError(error.message || '결제 처리 중 오류가 발생했습니다.');
+        } finally {
+            state.billing.isProcessingPurchase = false;
+            updateBillingPurchaseButton();
+        }
+    }
+
+    async function openBillingView(originSectionId) {
+        if (!state.auth.token) {
+            setInputError('결제 기능은 로그인 후 이용할 수 있습니다.');
+            return;
+        }
+
+        state.previousSectionId = originSectionId || 'input-section';
+        setActiveSection('billing-section');
+        window.scrollTo(0, 0);
+        await loadBillingScreenData();
+    }
+
+    function goBackFromBilling() {
+        setActiveSection(state.previousSectionId || 'input-section');
+        window.scrollTo(0, 0);
+    }
+
     document.getElementById('analyze-btn').addEventListener('click', startAnalysis);
     document.getElementById('back-btn').addEventListener('click', goBack);
 
@@ -1520,8 +2025,16 @@
         await openHistoryView('input-section');
     });
 
+    billingOpenBtn.addEventListener('click', async () => {
+        await openBillingView('input-section');
+    });
+
     resultHistoryBtn.addEventListener('click', async () => {
         await openHistoryView('result-section');
+    });
+
+    resultBillingBtn.addEventListener('click', async () => {
+        await openBillingView('result-section');
     });
 
     historyRefreshBtn.addEventListener('click', async () => {
@@ -1537,6 +2050,17 @@
         }
         await loadHistoryDetail(button.dataset.historyId);
     });
+
+    billingPlans.addEventListener('click', event => {
+        const button = event.target.closest('[data-plan-id]');
+        if (!button) {
+            return;
+        }
+        selectBillingPlan(button.dataset.planId);
+    });
+
+    billingPurchaseBtn.addEventListener('click', handleBillingPurchase);
+    billingBackBtn.addEventListener('click', goBackFromBilling);
 
     updateBirthTimeMode();
     initializeAuth();
