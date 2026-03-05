@@ -219,7 +219,7 @@ Authorization: Bearer <accessToken>
 ## 폴더 구조
 ```text
 .
-├── index
+├── index.html
 ├── server.js
 └── src
     ├── auth-service.js

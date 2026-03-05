@@ -13,7 +13,7 @@
 
 ## 2) 현재 상태 (As-Is)
 
-1. 단일 페이지 UI(`index`) + `/api/analyze` 백엔드 연동 완료
+1. 단일 페이지 UI(`index.html`) + `/api/analyze` 백엔드 연동 완료
 2. OpenAI/Mock 제공자 분리 구조 존재 (`src/providers`)
 3. 사주 계산은 `@fullstackfamily/manseryeok` 기반 엔진으로 교체 완료
 4. 회원가입/로그인 API + 히스토리 저장/조회 API는 구현 완료
