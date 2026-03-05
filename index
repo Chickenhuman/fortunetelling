@@ -367,6 +367,146 @@
             cursor: pointer;
         }
 
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: #fff4f1;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 14px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 0;
+            background: transparent;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .auth-tab.active {
+            background: var(--card-bg);
+            color: var(--primary-color);
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .auth-submit-btn {
+            margin-top: 0;
+            padding: 14px;
+            font-size: 14px;
+        }
+
+        .secondary-btn {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            padding: 11px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .secondary-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        .auth-user-line {
+            font-size: 14px;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .auth-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-save-status {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .history-item {
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--card-bg);
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .history-item.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(255, 126, 103, 0.15);
+        }
+
+        .history-item-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .history-item-meta {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        .history-item-summary {
+            font-size: 13px;
+            color: #5f6368;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .history-error {
+            margin-top: 10px;
+            color: var(--danger-color);
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 18px;
+        }
+
+        .history-detail-card {
+            margin-top: 14px;
+        }
+
+        .history-detail-meta {
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .history-action-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
         .back-btn {
             background: none;
             border: none;
@@ -392,6 +532,41 @@
         <div class="title-area">
             <h2>당신의 운명의 바코드를<br>해독해 드립니다.</h2>
             <p>정확한 사주풀이를 위해 정보를 입력해주세요.</p>
+        </div>
+
+        <div class="auth-card">
+            <div id="auth-logged-out">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" type="button" data-auth-mode="login">로그인</button>
+                    <button class="auth-tab" type="button" data-auth-mode="signup">회원가입</button>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label for="auth-email">이메일</label>
+                    <input type="email" id="auth-email" placeholder="user@example.com" autocomplete="email">
+                </div>
+
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label for="auth-password">비밀번호</label>
+                    <input type="password" id="auth-password" placeholder="8자 이상" autocomplete="current-password">
+                </div>
+
+                <div class="input-group" id="auth-displayname-group" style="margin-bottom: 12px;" hidden>
+                    <label for="auth-displayname">표시 이름</label>
+                    <input type="text" id="auth-displayname" placeholder="홍길동" autocomplete="name">
+                </div>
+
+                <p id="auth-error" class="error-text" style="min-height: 16px;"></p>
+                <button id="auth-submit-btn" class="submit-btn auth-submit-btn" type="button">로그인</button>
+            </div>
+
+            <div id="auth-logged-in" hidden>
+                <p id="auth-user-line" class="auth-user-line"></p>
+                <div class="auth-actions">
+                    <button id="history-open-btn" class="secondary-btn" type="button">내 히스토리</button>
+                    <button id="auth-logout-btn" class="secondary-btn" type="button">로그아웃</button>
+                </div>
+            </div>
         </div>
 
         <div class="input-group">
@@ -514,36 +689,120 @@
             <div id="report-content" class="loading">분석을 준비하고 있습니다...</div>
             <button id="retry-report-btn" class="retry-btn" hidden>다시 시도</button>
             <div id="provider-tag" class="provider-tag"></div>
+            <div id="history-save-status" class="history-save-status"></div>
         </div>
 
+        <div class="history-action-row">
+            <button id="result-history-btn" class="secondary-btn" type="button" hidden>내 히스토리 보기</button>
+        </div>
         <button id="back-btn" class="back-btn">다시 입력하기</button>
+    </section>
+
+    <section id="history-section" class="section">
+        <div class="title-area">
+            <h2>저장된 히스토리</h2>
+            <p>로그인한 계정의 분석 결과를 확인할 수 있습니다.</p>
+        </div>
+
+        <p id="history-error" class="history-error"></p>
+        <div id="history-loading" class="loading" hidden>히스토리를 불러오는 중입니다...</div>
+        <div id="history-empty" class="loading" hidden>저장된 히스토리가 없습니다.</div>
+        <div id="history-list" class="history-list"></div>
+
+        <div id="history-detail-card" class="ai-report history-detail-card" hidden>
+            <div class="ai-header">
+                <span id="history-detail-title">히스토리 상세</span>
+            </div>
+            <p id="history-detail-meta" class="history-detail-meta"></p>
+            <div id="history-detail-content"></div>
+        </div>
+
+        <div class="history-action-row">
+            <button id="history-refresh-btn" class="secondary-btn" type="button">목록 새로고침</button>
+        </div>
+        <button id="history-back-btn" class="back-btn" type="button">뒤로 가기</button>
     </section>
 </div>
 
 <script>
     const MAX_RETRY_COUNT = 2;
     const RETRY_DELAYS_MS = [700, 1400];
+    const AUTH_STORAGE_KEY = 'fortune_auth_v1';
+    const TYPE_LABELS = {
+        overall: '사주풀이',
+        daily: '일일운세',
+        monthly: '이번달',
+        yearly: '올해운세'
+    };
 
     const state = {
         profile: null,
         reports: {},
         currentType: 'overall',
-        requestId: 0
+        requestId: 0,
+        currentLoadOptions: {
+            forceReload: false,
+            persistHistory: false
+        },
+        previousSectionId: 'input-section',
+        lastSavedHistoryId: '',
+        auth: {
+            mode: 'login',
+            token: '',
+            user: null
+        },
+        history: {
+            items: [],
+            selectedId: ''
+        }
     };
 
     const inputSection = document.getElementById('input-section');
     const resultSection = document.getElementById('result-section');
+    const historySection = document.getElementById('history-section');
+
     const analyzeBtn = document.getElementById('analyze-btn');
     const inputError = document.getElementById('input-error');
     const birthTimeSelect = document.getElementById('birthtime');
+
     const reportTitle = document.getElementById('report-title');
     const reportContent = document.getElementById('report-content');
     const retryReportBtn = document.getElementById('retry-report-btn');
     const providerTag = document.getElementById('provider-tag');
+    const historySaveStatus = document.getElementById('history-save-status');
+    const resultHistoryBtn = document.getElementById('result-history-btn');
+
+    const authLoggedOut = document.getElementById('auth-logged-out');
+    const authLoggedIn = document.getElementById('auth-logged-in');
+    const authEmailInput = document.getElementById('auth-email');
+    const authPasswordInput = document.getElementById('auth-password');
+    const authDisplayNameInput = document.getElementById('auth-displayname');
+    const authDisplaynameGroup = document.getElementById('auth-displayname-group');
+    const authError = document.getElementById('auth-error');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const authModeButtons = document.querySelectorAll('[data-auth-mode]');
+    const authUserLine = document.getElementById('auth-user-line');
+    const authLogoutBtn = document.getElementById('auth-logout-btn');
+    const historyOpenBtn = document.getElementById('history-open-btn');
+
+    const historyError = document.getElementById('history-error');
+    const historyLoading = document.getElementById('history-loading');
+    const historyEmpty = document.getElementById('history-empty');
+    const historyList = document.getElementById('history-list');
+    const historyDetailCard = document.getElementById('history-detail-card');
+    const historyDetailTitle = document.getElementById('history-detail-title');
+    const historyDetailMeta = document.getElementById('history-detail-meta');
+    const historyDetailContent = document.getElementById('history-detail-content');
+    const historyRefreshBtn = document.getElementById('history-refresh-btn');
+    const historyBackBtn = document.getElementById('history-back-btn');
 
     function getSelectedValue(name) {
         const selected = document.querySelector(`input[name="${name}"]:checked`);
         return selected ? selected.value : '';
+    }
+
+    function getTypeLabel(type) {
+        return TYPE_LABELS[type] || '사주풀이';
     }
 
     function escapeHtml(text) {
@@ -556,12 +815,41 @@
     }
 
     function formatBirthDate(dateText) {
-        const [year, month, day] = dateText.split('-');
+        const [year, month, day] = String(dateText).split('-');
         return `${year}년 ${Number(month)}월 ${Number(day)}일`;
+    }
+
+    function formatDateTime(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return '-';
+        }
+        return date.toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    function setActiveSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.toggle('active', section.id === sectionId);
+        });
     }
 
     function setInputError(message) {
         inputError.textContent = message || '';
+    }
+
+    function setAuthError(message) {
+        authError.textContent = message || '';
+    }
+
+    function setHistoryError(message) {
+        historyError.textContent = message || '';
     }
 
     function setLoadingReport(message) {
@@ -574,6 +862,13 @@
         reportContent.className = 'report-error';
         reportContent.textContent = message;
         retryReportBtn.hidden = !canRetry;
+    }
+
+    function setHistoryLoading(show, message = '') {
+        historyLoading.hidden = !show;
+        if (message) {
+            historyLoading.textContent = message;
+        }
     }
 
     function updateBirthTimeMode() {
@@ -636,12 +931,13 @@
         fillPillarText('pillar-hour-branch', '-', '#9ca3af');
     }
 
-    function renderReport(report, meta) {
-        reportTitle.textContent = report.title;
-        reportContent.className = '';
-        retryReportBtn.hidden = true;
+    function buildReportHtml(report) {
+        const sections = Array.isArray(report.sections) ? report.sections : [];
+        const cautions = Array.isArray(report.cautions) ? report.cautions : [];
+        const actionTips = Array.isArray(report.actionTips) ? report.actionTips : [];
+        const lucky = report.lucky || {};
 
-        const sectionsHtml = report.sections
+        const sectionsHtml = sections
             .map(section => `
                 <div class="report-section">
                     <h4>${escapeHtml(section.heading)}</h4>
@@ -650,15 +946,15 @@
             `)
             .join('');
 
-        const cautionsHtml = report.cautions
+        const cautionsHtml = cautions
             .map(item => `<li>${escapeHtml(item)}</li>`)
             .join('');
 
-        const actionTipsHtml = report.actionTips
+        const actionTipsHtml = actionTips
             .map(item => `<li>${escapeHtml(item)}</li>`)
             .join('');
 
-        reportContent.innerHTML = `
+        return `
             <p class="ai-headline">${escapeHtml(report.headline)}</p>
             <p class="ai-summary">${escapeHtml(report.summary)}</p>
             ${sectionsHtml}
@@ -671,10 +967,16 @@
                 <ul class="report-list">${actionTipsHtml}</ul>
             </div>
             <div class="lucky-box">
-                행운 키워드: 색상 ${escapeHtml(report.lucky.color)} · 숫자 ${escapeHtml(report.lucky.number)} · 방향 ${escapeHtml(report.lucky.direction)}
+                행운 키워드: 색상 ${escapeHtml(lucky.color || '-')} · 숫자 ${escapeHtml(lucky.number || '-')} · 방향 ${escapeHtml(lucky.direction || '-')}
             </div>
         `;
+    }
 
+    function renderReport(report, meta) {
+        reportTitle.textContent = report.title;
+        reportContent.className = '';
+        retryReportBtn.hidden = true;
+        reportContent.innerHTML = buildReportHtml(report);
         providerTag.textContent = `분석 엔진: ${meta.provider.toUpperCase()} / 타입: ${meta.type}`;
     }
 
@@ -691,7 +993,7 @@
     }
 
     function createClientError({ message, code = 'UNKNOWN_ERROR', retryable = false }) {
-        const error = new Error(message || '분석 요청에 실패했습니다.');
+        const error = new Error(message || '요청에 실패했습니다.');
         error.code = code;
         error.retryable = Boolean(retryable);
         return error;
@@ -713,7 +1015,7 @@
         }
 
         return createClientError({
-            message: '분석 요청에 실패했습니다.',
+            message: '요청에 실패했습니다.',
             code: 'UNKNOWN_ERROR',
             retryable: false
         });
@@ -739,7 +1041,7 @@
     function extractApiError(response, payload) {
         if (payload && typeof payload.error === 'object' && payload.error !== null) {
             return createClientError({
-                message: payload.error.message || '분석 요청에 실패했습니다.',
+                message: payload.error.message || '요청에 실패했습니다.',
                 code: payload.error.code || 'API_ERROR',
                 retryable: Boolean(payload.error.retryable)
             });
@@ -756,29 +1058,196 @@
         });
     }
 
+    async function requestJson(url, options = {}) {
+        const method = options.method || 'GET';
+        const authToken = options.authToken || '';
+        const body = options.body;
+        const headers = {};
+
+        if (body !== undefined) {
+            headers['Content-Type'] = 'application/json';
+        }
+        if (authToken) {
+            headers.Authorization = `Bearer ${authToken}`;
+        }
+
+        const response = await fetch(url, {
+            method,
+            headers,
+            body: body !== undefined ? JSON.stringify(body) : undefined
+        });
+
+        const payload = await parseJsonOrThrow(response);
+        if (!response.ok || !payload || !payload.ok) {
+            throw extractApiError(response, payload);
+        }
+        return payload.data;
+    }
+
+    function saveAuthToStorage() {
+        if (!state.auth.token || !state.auth.user) {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            return;
+        }
+
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+            token: state.auth.token,
+            user: state.auth.user
+        }));
+    }
+
+    function loadAuthFromStorage() {
+        try {
+            const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (!raw) {
+                return null;
+            }
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') {
+                return null;
+            }
+            if (!parsed.token || !parsed.user) {
+                return null;
+            }
+            return parsed;
+        } catch {
+            return null;
+        }
+    }
+
+    function setAuthMode(mode) {
+        state.auth.mode = mode === 'signup' ? 'signup' : 'login';
+        renderAuthMode();
+    }
+
+    function renderAuthMode() {
+        authModeButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.authMode === state.auth.mode);
+        });
+        authDisplaynameGroup.hidden = state.auth.mode !== 'signup';
+        authSubmitBtn.textContent = state.auth.mode === 'signup' ? '회원가입' : '로그인';
+    }
+
+    function renderAuthState() {
+        const isLoggedIn = Boolean(state.auth.token && state.auth.user);
+        authLoggedOut.hidden = isLoggedIn;
+        authLoggedIn.hidden = !isLoggedIn;
+        resultHistoryBtn.hidden = !isLoggedIn;
+
+        if (isLoggedIn) {
+            authUserLine.textContent = `${state.auth.user.displayName} (${state.auth.user.email})`;
+            if (!historySaveStatus.textContent) {
+                historySaveStatus.textContent = '로그인 상태에서 종합 분석 시 히스토리에 자동 저장됩니다.';
+            }
+            return;
+        }
+
+        historySaveStatus.textContent = '로그인하면 종합 분석 결과를 히스토리에 저장할 수 있습니다.';
+        if (historySection.classList.contains('active')) {
+            setActiveSection('input-section');
+        }
+    }
+
+    function clearAuthState() {
+        state.auth.token = '';
+        state.auth.user = null;
+        state.history.items = [];
+        state.history.selectedId = '';
+        state.lastSavedHistoryId = '';
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        renderAuthState();
+    }
+
+    async function initializeAuth() {
+        renderAuthMode();
+        const stored = loadAuthFromStorage();
+        if (!stored) {
+            renderAuthState();
+            return;
+        }
+
+        state.auth.token = stored.token;
+        try {
+            const me = await requestJson('/api/auth/me', {
+                authToken: stored.token
+            });
+            state.auth.user = me.user;
+            saveAuthToStorage();
+        } catch {
+            clearAuthState();
+            return;
+        }
+
+        renderAuthState();
+    }
+
+    async function handleAuthSubmit() {
+        setAuthError('');
+
+        const email = authEmailInput.value.trim();
+        const password = authPasswordInput.value;
+        const displayName = authDisplayNameInput.value.trim();
+
+        if (!email || !password) {
+            setAuthError('이메일과 비밀번호를 입력해주세요.');
+            return;
+        }
+
+        authSubmitBtn.disabled = true;
+        authSubmitBtn.textContent = state.auth.mode === 'signup' ? '가입 중...' : '로그인 중...';
+
+        try {
+            const endpoint = state.auth.mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+            const payload = await requestJson(endpoint, {
+                method: 'POST',
+                body: state.auth.mode === 'signup'
+                    ? { email, password, displayName }
+                    : { email, password }
+            });
+
+            state.auth.token = payload.accessToken;
+            state.auth.user = payload.user;
+            saveAuthToStorage();
+            authPasswordInput.value = '';
+            setAuthError('');
+            renderAuthState();
+        } catch (error) {
+            setAuthError(error.message || '인증 요청에 실패했습니다.');
+        } finally {
+            authSubmitBtn.disabled = false;
+            authSubmitBtn.textContent = state.auth.mode === 'signup' ? '회원가입' : '로그인';
+        }
+    }
+
     async function fetchAnalysis(type, options = {}) {
         const onRetry = typeof options.onRetry === 'function' ? options.onRetry : null;
+        const shouldPersistHistory = Boolean(
+            options.persistHistory && state.auth.token && type === 'overall'
+        );
+        const endpoint = shouldPersistHistory ? '/api/history/analyze' : '/api/analyze';
 
         for (let attempt = 0; attempt <= MAX_RETRY_COUNT; attempt++) {
             try {
-                const response = await fetch('/api/analyze', {
+                const data = await requestJson(endpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
+                    authToken: shouldPersistHistory ? state.auth.token : '',
+                    body: {
                         profile: state.profile,
                         type
-                    })
+                    }
                 });
 
-                const payload = await parseJsonOrThrow(response);
-
-                if (!response.ok || !payload || !payload.ok) {
-                    throw extractApiError(response, payload);
+                if (shouldPersistHistory) {
+                    return {
+                        analysis: data.analysis,
+                        historyId: data.id
+                    };
                 }
 
-                return payload.data;
+                return {
+                    analysis: data,
+                    historyId: ''
+                };
             } catch (error) {
                 const normalizedError = normalizeClientError(error);
                 const canRetry = normalizedError.retryable && attempt < MAX_RETRY_COUNT;
@@ -804,11 +1273,17 @@
     }
 
     async function loadReport(type, options = {}) {
-        const forceReload = Boolean(options.forceReload);
+        const normalizedOptions = {
+            forceReload: false,
+            persistHistory: false,
+            ...options
+        };
+
         state.currentType = type;
+        state.currentLoadOptions = normalizedOptions;
         const currentRequestId = ++state.requestId;
 
-        if (!forceReload && state.reports[type]) {
+        if (!normalizedOptions.forceReload && state.reports[type]) {
             const cached = state.reports[type];
             renderPillars(cached.pillars);
             renderReport(cached.report, cached.meta);
@@ -819,6 +1294,7 @@
 
         try {
             const result = await fetchAnalysis(type, {
+                persistHistory: normalizedOptions.persistHistory,
                 onRetry: (retryCount, maxRetryCount) => {
                     if (currentRequestId !== state.requestId) {
                         return;
@@ -826,14 +1302,25 @@
                     setLoadingReport(`일시적 오류로 재시도 중입니다... (${retryCount}/${maxRetryCount})`);
                 }
             });
-            state.reports[type] = result;
 
             if (currentRequestId !== state.requestId) {
                 return;
             }
 
-            renderPillars(result.pillars);
-            renderReport(result.report, result.meta);
+            state.reports[type] = result.analysis;
+            if (type === 'overall') {
+                if (result.historyId) {
+                    state.lastSavedHistoryId = result.historyId;
+                    historySaveStatus.textContent = `히스토리에 저장됨 (${formatDateTime(new Date().toISOString())})`;
+                } else if (state.auth.token) {
+                    historySaveStatus.textContent = '종합 분석을 새로 수행하면 히스토리에 저장됩니다.';
+                } else {
+                    historySaveStatus.textContent = '로그인하면 종합 분석 결과를 히스토리에 저장할 수 있습니다.';
+                }
+            }
+
+            renderPillars(result.analysis.pillars);
+            renderReport(result.analysis.report, result.analysis.meta);
         } catch (error) {
             if (currentRequestId !== state.requestId) {
                 return;
@@ -865,18 +1352,20 @@
         state.reports = {};
         analyzeBtn.disabled = true;
         analyzeBtn.textContent = '분석 중...';
+        historySaveStatus.textContent = state.auth.token
+            ? '종합 분석 결과를 히스토리에 저장 중입니다...'
+            : '로그인하면 종합 분석 결과를 히스토리에 저장할 수 있습니다.';
 
         updateUserInfo(state.profile);
         setActiveTab('overall');
         setLoadingReport('AI가 사주 흐름을 분석하고 있습니다...');
         providerTag.textContent = '';
 
-        inputSection.classList.remove('active');
-        resultSection.classList.add('active');
+        setActiveSection('result-section');
         window.scrollTo(0, 0);
 
         try {
-            await loadReport('overall');
+            await loadReport('overall', { persistHistory: true });
         } finally {
             analyzeBtn.disabled = false;
             analyzeBtn.textContent = 'AI 사주 분석하기';
@@ -884,17 +1373,125 @@
     }
 
     function goBack() {
-        resultSection.classList.remove('active');
-        inputSection.classList.add('active');
+        setActiveSection('input-section');
+        window.scrollTo(0, 0);
+    }
+
+    function resetHistoryDetail() {
+        historyDetailCard.hidden = true;
+        historyDetailTitle.textContent = '히스토리 상세';
+        historyDetailMeta.textContent = '';
+        historyDetailContent.innerHTML = '';
+    }
+
+    function highlightSelectedHistory() {
+        document.querySelectorAll('[data-history-id]').forEach(button => {
+            button.classList.toggle('active', button.dataset.historyId === state.history.selectedId);
+        });
+    }
+
+    function renderHistoryList(items) {
+        historyList.innerHTML = '';
+        items.forEach(item => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'history-item';
+            button.dataset.historyId = item.id;
+            button.innerHTML = `
+                <p class="history-item-title">${escapeHtml(item.report.title)}</p>
+                <p class="history-item-meta">${escapeHtml(formatDateTime(item.createdAt))} · ${escapeHtml(getTypeLabel(item.type))}</p>
+                <p class="history-item-summary">${escapeHtml(item.report.headline)}</p>
+            `;
+            historyList.appendChild(button);
+        });
+        highlightSelectedHistory();
+    }
+
+    function renderHistoryDetail(detail) {
+        const profile = detail.profile;
+        const calendarLabel = profile.calendarType === 'solar' ? '양력' : '음력';
+        const timeLabel = profile.birthTimeUnknown ? '출생시간 모름' : profile.birthTime;
+
+        historyDetailCard.hidden = false;
+        historyDetailTitle.textContent = detail.analysis.report.title;
+        historyDetailMeta.textContent = `${formatDateTime(detail.createdAt)} · ${getTypeLabel(detail.type)} · ${formatBirthDate(profile.birthDate)} (${calendarLabel}) ${timeLabel}`;
+        historyDetailContent.innerHTML = buildReportHtml(detail.analysis.report);
+    }
+
+    async function loadHistoryDetail(historyId) {
+        try {
+            setHistoryError('');
+            const detail = await requestJson(`/api/history/${encodeURIComponent(historyId)}`, {
+                authToken: state.auth.token
+            });
+            state.history.selectedId = historyId;
+            renderHistoryDetail(detail);
+            highlightSelectedHistory();
+        } catch (error) {
+            setHistoryError(error.message || '히스토리 상세를 불러오지 못했습니다.');
+        }
+    }
+
+    async function loadHistoryList() {
+        if (!state.auth.token) {
+            setHistoryError('히스토리는 로그인 후 이용할 수 있습니다.');
+            return;
+        }
+
+        setHistoryError('');
+        historyEmpty.hidden = true;
+        setHistoryLoading(true, '히스토리를 불러오는 중입니다...');
+        resetHistoryDetail();
+
+        try {
+            const data = await requestJson('/api/history?limit=30', {
+                authToken: state.auth.token
+            });
+            state.history.items = Array.isArray(data.items) ? data.items : [];
+            renderHistoryList(state.history.items);
+
+            if (!state.history.items.length) {
+                historyEmpty.hidden = false;
+                return;
+            }
+
+            const selectedExists = state.history.items.some(item => item.id === state.history.selectedId);
+            const targetId = selectedExists ? state.history.selectedId : state.history.items[0].id;
+            await loadHistoryDetail(targetId);
+        } catch (error) {
+            setHistoryError(error.message || '히스토리를 불러오지 못했습니다.');
+        } finally {
+            setHistoryLoading(false);
+        }
+    }
+
+    async function openHistoryView(originSectionId) {
+        if (!state.auth.token) {
+            setInputError('히스토리 기능은 로그인 후 이용할 수 있습니다.');
+            return;
+        }
+
+        state.previousSectionId = originSectionId || 'input-section';
+        setActiveSection('history-section');
+        window.scrollTo(0, 0);
+        await loadHistoryList();
+    }
+
+    function goBackFromHistory() {
+        setActiveSection(state.previousSectionId || 'input-section');
         window.scrollTo(0, 0);
     }
 
     document.getElementById('analyze-btn').addEventListener('click', startAnalysis);
     document.getElementById('back-btn').addEventListener('click', goBack);
+
     retryReportBtn.addEventListener('click', async () => {
         setLoadingReport('다시 분석을 시도하고 있습니다...');
         providerTag.textContent = '';
-        await loadReport(state.currentType, { forceReload: true });
+        await loadReport(state.currentType, {
+            ...state.currentLoadOptions,
+            forceReload: true
+        });
     });
 
     document.querySelectorAll('input[name="timeKnown"]').forEach(input => {
@@ -905,11 +1502,44 @@
         tab.addEventListener('click', async () => {
             const type = tab.dataset.type;
             setActiveTab(type);
-            await loadReport(type);
+            await loadReport(type, { persistHistory: false });
         });
     });
 
+    authModeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            setAuthMode(button.dataset.authMode);
+            setAuthError('');
+        });
+    });
+
+    authSubmitBtn.addEventListener('click', handleAuthSubmit);
+    authLogoutBtn.addEventListener('click', clearAuthState);
+
+    historyOpenBtn.addEventListener('click', async () => {
+        await openHistoryView('input-section');
+    });
+
+    resultHistoryBtn.addEventListener('click', async () => {
+        await openHistoryView('result-section');
+    });
+
+    historyRefreshBtn.addEventListener('click', async () => {
+        await loadHistoryList();
+    });
+
+    historyBackBtn.addEventListener('click', goBackFromHistory);
+
+    historyList.addEventListener('click', async event => {
+        const button = event.target.closest('[data-history-id]');
+        if (!button) {
+            return;
+        }
+        await loadHistoryDetail(button.dataset.historyId);
+    });
+
     updateBirthTimeMode();
+    initializeAuth();
 </script>
 
 </body>

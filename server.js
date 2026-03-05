@@ -6,6 +6,17 @@ import { validateAnalyzePayload } from "./src/validation.js";
 import { analyzeFortune } from "./src/fortune-service.js";
 import { AppError, isAppError } from "./src/errors.js";
 import { signup, login, getMe } from "./src/auth-service.js";
+import {
+  createHistory,
+  listHistoriesByUser,
+  getHistoryById
+} from "./src/history-service.js";
+import {
+  listCreditPlans,
+  createCheckout,
+  confirmCheckout,
+  getBillingSummary
+} from "./src/billing-service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -83,11 +94,33 @@ function toAppError(error) {
   });
 }
 
+function validateAnalyzeRequestBody(body) {
+  try {
+    return validateAnalyzePayload(body);
+  } catch (error) {
+    throw new AppError({
+      code: "VALIDATION_ERROR",
+      message: error instanceof Error ? error.message : "요청 값이 올바르지 않습니다.",
+      statusCode: 400,
+      retryable: false,
+      cause: error
+    });
+  }
+}
+
+async function requireAuthenticatedUser(req) {
+  const result = await getMe(req.headers.authorization);
+  return result.user;
+}
+
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 
-    if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index")) {
+    if (
+      req.method === "GET" &&
+      (url.pathname === "/" || url.pathname === "/index" || url.pathname === "/index.html")
+    ) {
       const html = await readFile(INDEX_FILE, "utf8");
       res.writeHead(200, {
         "Content-Type": "text/html; charset=utf-8",
@@ -108,25 +141,106 @@ const server = createServer(async (req, res) => {
 
     if (req.method === "POST" && url.pathname === "/api/analyze") {
       const body = await readJsonBody(req);
-      let validated = null;
-
-      try {
-        validated = validateAnalyzePayload(body);
-      } catch (error) {
-        throw new AppError({
-          code: "VALIDATION_ERROR",
-          message: error instanceof Error ? error.message : "요청 값이 올바르지 않습니다.",
-          statusCode: 400,
-          retryable: false,
-          cause: error
-        });
-      }
-
+      const validated = validateAnalyzeRequestBody(body);
       const analysis = await analyzeFortune(validated);
 
       sendJson(res, 200, {
         ok: true,
         data: analysis
+      });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/history/analyze") {
+      const user = await requireAuthenticatedUser(req);
+      const body = await readJsonBody(req);
+      const validated = validateAnalyzeRequestBody(body);
+      const analysis = await analyzeFortune(validated);
+      const history = await createHistory({
+        user,
+        profile: validated.profile,
+        type: validated.type,
+        analysis
+      });
+
+      sendJson(res, 201, {
+        ok: true,
+        data: history
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/history") {
+      const user = await requireAuthenticatedUser(req);
+      const limit = url.searchParams.get("limit");
+      const historyList = await listHistoriesByUser({ user, limit });
+
+      sendJson(res, 200, {
+        ok: true,
+        data: historyList
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname.startsWith("/api/history/")) {
+      const user = await requireAuthenticatedUser(req);
+      const historyId = decodeURIComponent(url.pathname.slice("/api/history/".length));
+      const history = await getHistoryById({ user, historyId });
+
+      sendJson(res, 200, {
+        ok: true,
+        data: history
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/billing/plans") {
+      sendJson(res, 200, {
+        ok: true,
+        data: {
+          plans: listCreditPlans()
+        }
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/billing/me") {
+      const user = await requireAuthenticatedUser(req);
+      const summary = await getBillingSummary({ user });
+
+      sendJson(res, 200, {
+        ok: true,
+        data: summary
+      });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/billing/checkout") {
+      const user = await requireAuthenticatedUser(req);
+      const body = await readJsonBody(req);
+      const checkout = await createCheckout({
+        user,
+        planId: body?.planId
+      });
+
+      sendJson(res, 201, {
+        ok: true,
+        data: checkout
+      });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/billing/checkout/confirm") {
+      const user = await requireAuthenticatedUser(req);
+      const body = await readJsonBody(req);
+      const result = await confirmCheckout({
+        user,
+        paymentId: body?.paymentId
+      });
+
+      sendJson(res, 200, {
+        ok: true,
+        data: result
       });
       return;
     }

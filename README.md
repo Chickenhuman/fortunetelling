@@ -3,10 +3,12 @@
 
 ## 현재 구현 상태
 - 프론트엔드: 단일 페이지 UI에서 실제 API 호출로 전환
+- 인증 UI: 로그인/회원가입/로그아웃(이메일 기반)
 - 입력: 이름, 성별, 생년월일, 양력/음력, 출생시간 + `모름` 버튼
 - 분석 탭: 종합/일일/월간/연간
 - 분석 UX: 일시적 실패 시 자동 재시도 + 수동 재시도 버튼 제공
-- 백엔드: `/api/analyze` 단일 엔드포인트
+- 히스토리 UI: 저장된 분석 목록/상세 조회
+- 백엔드: 분석/인증/히스토리/결제 API 제공
 - AI 제공자: `OpenAI` 우선, `mock` 제공자 포함(멀티모델 확장 구조)
 - 사주 엔진: `@fullstackfamily/manseryeok` 기반(지원 입력 연도: `1900~2050`)
 - 개인정보 정책: 서버 코드에서 요청 원문 저장/로그 금지
@@ -111,28 +113,94 @@ Authorization: Bearer <accessToken>
 {
   "ok": true,
   "data": {
-    "meta": {
-      "provider": "mock",
-      "type": "overall"
-    },
-    "pillars": {
-      "year": {"stem": "己", "stemColor": "#A1887F", "branch": "巳", "branchColor": "#D84315"},
-      "month": {"stem": "乙", "stemColor": "#2E7D32", "branch": "卯", "branchColor": "#2E7D32"},
-      "day": {"stem": "壬", "stemColor": "#1565C0", "branch": "辰", "branchColor": "#A1887F"},
-      "hour": null
-    },
-    "report": {
-      "title": "AI 종합 사주풀이",
-      "headline": "...",
-      "summary": "...",
-      "sections": [{"heading": "...", "body": "..."}],
-      "cautions": ["..."],
-      "actionTips": ["..."],
-      "lucky": {"color": "...", "number": "...", "direction": "..."}
+    "user": {
+      "id": "uuid",
+      "email": "user@example.com",
+      "displayName": "홍길동",
+      "createdAt": "2026-03-05T00:00:00.000Z",
+      "updatedAt": "2026-03-05T00:00:00.000Z"
     }
   }
 }
 ```
+
+### `POST /api/history/analyze`
+설명:
+- 인증 사용자 기준으로 사주 분석을 수행하고 히스토리에 저장합니다.
+
+요청 헤더:
+
+```text
+Authorization: Bearer <accessToken>
+```
+
+요청 본문:
+
+```json
+{
+  "profile": {
+    "name": "홍길동",
+    "gender": "male",
+    "birthDate": "1990-01-01",
+    "calendarType": "solar",
+    "birthTimeUnknown": true,
+    "birthTime": ""
+  },
+  "type": "overall"
+}
+```
+
+### `GET /api/history?limit=20`
+설명:
+- 인증 사용자 히스토리 목록(최신순)을 조회합니다.
+
+### `GET /api/history/:id`
+설명:
+- 인증 사용자 본인의 히스토리 상세를 조회합니다.
+
+### `GET /api/billing/plans`
+설명:
+- 크레딧 결제 요금제 목록을 조회합니다.
+
+### `POST /api/billing/checkout`
+설명:
+- 결제 요청(체크아웃)을 생성합니다.
+
+요청 헤더:
+
+```text
+Authorization: Bearer <accessToken>
+```
+
+요청 본문:
+
+```json
+{
+  "planId": "credit_starter"
+}
+```
+
+### `POST /api/billing/checkout/confirm`
+설명:
+- 결제를 확정하고 크레딧을 지갑에 반영합니다. (개발 단계 mock 결제)
+
+요청 헤더:
+
+```text
+Authorization: Bearer <accessToken>
+```
+
+요청 본문:
+
+```json
+{
+  "paymentId": "uuid"
+}
+```
+
+### `GET /api/billing/me`
+설명:
+- 내 지갑(보유 크레딧), 결제 내역, 크레딧 거래 내역을 조회합니다.
 
 오류 응답(표준):
 
@@ -155,7 +223,9 @@ Authorization: Bearer <accessToken>
 └── src
     ├── auth-service.js
     ├── errors.js
+    ├── billing-service.js
     ├── fortune-service.js
+    ├── history-service.js
     ├── prompt.js
     ├── saju-engine.js
     ├── validation.js
