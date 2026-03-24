@@ -31,6 +31,10 @@
             justify-content: center;
         }
 
+        body.auth-modal-open {
+            overflow: hidden;
+        }
+
         #app-container {
             width: 100%;
             max-width: 420px;
@@ -42,19 +46,63 @@
         }
 
         header {
-            padding: 24px 20px;
+            padding: 18px 20px;
             background: var(--card-bg);
             position: sticky;
             top: 0;
             z-index: 10;
             border-bottom: 1px solid var(--border-color);
-            text-align: center;
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .header-copy {
+            min-width: 0;
+        }
+
+        .header-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #c75643;
         }
 
         header h1 {
-            font-size: 18px;
+            margin-top: 4px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--text-main);
+        }
+
+        .header-copy p:last-child {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        .header-auth-btn {
+            flex-shrink: 0;
+            border: none;
+            border-radius: 999px;
+            background: #fff1ed;
+            color: #c75643;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .header-auth-btn.logged-in {
+            background: var(--text-main);
+            color: #ffffff;
         }
 
         .section {
@@ -86,6 +134,27 @@
             color: var(--text-sub);
             margin-top: 8px;
             font-size: 14px;
+        }
+
+        .quick-guide {
+            margin-bottom: 20px;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #ffd8cf;
+            background: linear-gradient(135deg, #fff6f2 0%, #fffdfc 100%);
+        }
+
+        .quick-guide strong {
+            display: block;
+            font-size: 14px;
+            color: #c75643;
+        }
+
+        .quick-guide p {
+            margin-top: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-sub);
         }
 
         .input-group {
@@ -367,12 +436,79 @@
             cursor: pointer;
         }
 
-        .auth-card {
+        .auth-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 88px 16px 24px;
+            background: rgba(17, 24, 39, 0.45);
+        }
+
+        .auth-modal.open {
+            display: flex;
+        }
+
+        .auth-modal-panel {
+            width: min(388px, 100%);
+            max-height: calc(100vh - 112px);
+            overflow-y: auto;
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 126, 103, 0.16);
+            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.18);
+            padding: 18px;
+        }
+
+        .auth-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .auth-modal-title p {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #c75643;
+        }
+
+        .auth-modal-title h2 {
+            margin-top: 4px;
+            font-size: 20px;
+            color: var(--text-main);
+        }
+
+        .auth-modal-title span {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-sub);
+        }
+
+        .auth-close-btn {
+            border: none;
+            background: #f3f4f6;
+            color: var(--text-sub);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .auth-card {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 0;
         }
 
         .auth-tabs {
@@ -405,6 +541,10 @@
             margin-top: 0;
             padding: 14px;
             font-size: 14px;
+        }
+
+        .auth-logged-out-tip {
+            margin-top: 12px;
         }
 
         .secondary-btn {
@@ -689,7 +829,14 @@
 
 <div id="app-container">
     <header>
-        <h1>AI 사주 마스터</h1>
+        <div class="header-bar">
+            <div class="header-copy">
+                <p class="header-eyebrow">Fortunetelling Beta</p>
+                <h1>AI 사주 마스터</h1>
+                <p>로그인 없이 바로 조회하고, 저장이 필요할 때만 계정을 열어두세요.</p>
+            </div>
+            <button id="header-auth-btn" class="header-auth-btn" type="button">로그인</button>
+        </div>
     </header>
 
     <section id="input-section" class="section active">
@@ -698,43 +845,9 @@
             <p>정확한 사주풀이를 위해 정보를 입력해주세요.</p>
         </div>
 
-        <div class="auth-card">
-            <div id="auth-logged-out">
-                <div class="auth-tabs">
-                    <button class="auth-tab active" type="button" data-auth-mode="login">로그인</button>
-                    <button class="auth-tab" type="button" data-auth-mode="signup">회원가입</button>
-                </div>
-
-                <div class="input-group" style="margin-bottom: 12px;">
-                    <label for="auth-email">이메일</label>
-                    <input type="email" id="auth-email" placeholder="user@example.com" autocomplete="email">
-                </div>
-
-                <div class="input-group" style="margin-bottom: 12px;">
-                    <label for="auth-password">비밀번호</label>
-                    <input type="password" id="auth-password" placeholder="8자 이상" autocomplete="current-password">
-                </div>
-
-                <div class="input-group" id="auth-displayname-group" style="margin-bottom: 12px;" hidden>
-                    <label for="auth-displayname">표시 이름</label>
-                    <input type="text" id="auth-displayname" placeholder="홍길동" autocomplete="name">
-                </div>
-
-                <p id="auth-error" class="error-text" style="min-height: 16px;"></p>
-                <button id="auth-submit-btn" class="submit-btn auth-submit-btn" type="button">로그인</button>
-            </div>
-
-            <div id="auth-logged-in" hidden>
-                <p id="auth-user-line" class="auth-user-line"></p>
-                <p id="billing-credit-line" class="billing-credit-line">보유 크레딧: 조회 중...</p>
-                <div class="auth-actions">
-                    <button id="history-open-btn" class="secondary-btn" type="button">내 히스토리</button>
-                    <button id="billing-open-btn" class="secondary-btn" type="button">크레딧 충전</button>
-                </div>
-                <div class="auth-actions">
-                    <button id="auth-logout-btn" class="secondary-btn" type="button">로그아웃</button>
-                </div>
-            </div>
+        <div class="quick-guide">
+            <strong>비회원도 바로 조회 가능합니다</strong>
+            <p>이름과 생년월일, 출생시간만 입력하면 바로 분석합니다. 로그인은 결과 저장이나 결제가 필요할 때만 사용하면 됩니다.</p>
         </div>
 
         <div id="input-ad-slot" class="ad-slot" hidden>
@@ -949,6 +1062,59 @@
 
         <button id="billing-back-btn" class="back-btn" type="button">뒤로 가기</button>
     </section>
+
+    <div id="auth-modal" class="auth-modal" hidden>
+        <div class="auth-modal-panel" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+            <div class="auth-modal-header">
+                <div class="auth-modal-title">
+                    <p>Account</p>
+                    <h2 id="auth-modal-title">로그인</h2>
+                    <span>비회원 조회는 바로 가능하고, 로그인은 저장 기능이 필요할 때만 사용하면 됩니다.</span>
+                </div>
+                <button id="auth-close-btn" class="auth-close-btn" type="button">닫기</button>
+            </div>
+
+            <div class="auth-card">
+                <div id="auth-logged-out">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" type="button" data-auth-mode="login">로그인</button>
+                        <button class="auth-tab" type="button" data-auth-mode="signup">회원가입</button>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 12px;">
+                        <label for="auth-email">이메일</label>
+                        <input type="email" id="auth-email" placeholder="user@example.com" autocomplete="email">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 12px;">
+                        <label for="auth-password">비밀번호</label>
+                        <input type="password" id="auth-password" placeholder="8자 이상" autocomplete="current-password">
+                    </div>
+
+                    <div class="input-group" id="auth-displayname-group" style="margin-bottom: 12px;" hidden>
+                        <label for="auth-displayname">표시 이름</label>
+                        <input type="text" id="auth-displayname" placeholder="홍길동" autocomplete="name">
+                    </div>
+
+                    <p class="helper-text auth-logged-out-tip">지금은 로그인 없이도 사주 조회를 바로 테스트할 수 있습니다.</p>
+                    <p id="auth-error" class="error-text" style="min-height: 16px;"></p>
+                    <button id="auth-submit-btn" class="submit-btn auth-submit-btn" type="button">로그인</button>
+                </div>
+
+                <div id="auth-logged-in" hidden>
+                    <p id="auth-user-line" class="auth-user-line"></p>
+                    <p id="billing-credit-line" class="billing-credit-line">보유 크레딧: 조회 중...</p>
+                    <div class="auth-actions">
+                        <button id="history-open-btn" class="secondary-btn" type="button">내 히스토리</button>
+                        <button id="billing-open-btn" class="secondary-btn" type="button">크레딧 충전</button>
+                    </div>
+                    <div class="auth-actions">
+                        <button id="auth-logout-btn" class="secondary-btn" type="button">로그아웃</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -997,6 +1163,10 @@
     const resultSection = document.getElementById('result-section');
     const historySection = document.getElementById('history-section');
     const billingSection = document.getElementById('billing-section');
+    const headerAuthBtn = document.getElementById('header-auth-btn');
+    const authModal = document.getElementById('auth-modal');
+    const authCloseBtn = document.getElementById('auth-close-btn');
+    const authModalTitle = document.getElementById('auth-modal-title');
 
     const analyzeBtn = document.getElementById('analyze-btn');
     const inputError = document.getElementById('input-error');
@@ -1135,6 +1305,21 @@
 
     function setAuthError(message) {
         authError.textContent = message || '';
+    }
+
+    function setAuthModalOpen(isOpen) {
+        authModal.hidden = !isOpen;
+        authModal.classList.toggle('open', isOpen);
+        document.body.classList.toggle('auth-modal-open', isOpen);
+    }
+
+    function openAuthModal() {
+        setAuthError('');
+        setAuthModalOpen(true);
+    }
+
+    function closeAuthModal() {
+        setAuthModalOpen(false);
     }
 
     function setHistoryError(message) {
@@ -1688,17 +1873,25 @@
         authLoggedIn.hidden = !isLoggedIn;
         resultHistoryBtn.hidden = !isLoggedIn;
         resultBillingBtn.hidden = !isLoggedIn;
+        headerAuthBtn.classList.toggle('logged-in', isLoggedIn);
         updateBillingCreditLine();
         updateBillingPurchaseButton();
 
         if (isLoggedIn) {
             authUserLine.textContent = `${state.auth.user.displayName} (${state.auth.user.email})`;
+            headerAuthBtn.textContent = '내 계정';
+            headerAuthBtn.title = `${state.auth.user.displayName} 계정`;
+            authModalTitle.textContent = '내 계정';
             if (!historySaveStatus.textContent) {
                 historySaveStatus.textContent = '로그인 상태에서 종합 분석 시 히스토리에 자동 저장됩니다.';
             }
             return;
         }
 
+        authUserLine.textContent = '';
+        headerAuthBtn.textContent = '로그인';
+        headerAuthBtn.title = '로그인';
+        authModalTitle.textContent = '로그인';
         historySaveStatus.textContent = '로그인하면 종합 분석 결과를 히스토리에 저장할 수 있습니다.';
         if (historySection.classList.contains('active')) {
             setActiveSection('input-section');
@@ -1717,6 +1910,7 @@
         clearBillingState();
         localStorage.removeItem(AUTH_STORAGE_KEY);
         renderAuthState();
+        closeAuthModal();
         void refreshAdPlacements();
     }
 
@@ -1725,6 +1919,7 @@
         const stored = loadAuthFromStorage();
         if (!stored) {
             renderAuthState();
+            await refreshAdPlacements(['input']);
             return;
         }
 
@@ -1784,6 +1979,7 @@
                 clearBillingState();
             }
             renderAuthState();
+            closeAuthModal();
             await refreshAdPlacements();
         } catch (error) {
             setAuthError(error.message || '인증 요청에 실패했습니다.');
@@ -1928,7 +2124,7 @@
         analyzeBtn.textContent = '분석 중...';
         historySaveStatus.textContent = state.auth.token
             ? '종합 분석 결과를 히스토리에 저장 중입니다...'
-            : '로그인하면 종합 분석 결과를 히스토리에 저장할 수 있습니다.';
+            : '비회원 조회 중입니다. 로그인하면 종합 분석 결과를 저장할 수 있습니다.';
 
         updateUserInfo(state.profile);
         setActiveTab('overall');
@@ -2177,14 +2373,29 @@
         });
     });
 
+    headerAuthBtn.addEventListener('click', openAuthModal);
+    authCloseBtn.addEventListener('click', closeAuthModal);
+    authModal.addEventListener('click', event => {
+        if (event.target === authModal) {
+            closeAuthModal();
+        }
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && authModal.classList.contains('open')) {
+            closeAuthModal();
+        }
+    });
+
     authSubmitBtn.addEventListener('click', handleAuthSubmit);
     authLogoutBtn.addEventListener('click', clearAuthState);
 
     historyOpenBtn.addEventListener('click', async () => {
+        closeAuthModal();
         await openHistoryView('input-section');
     });
 
     billingOpenBtn.addEventListener('click', async () => {
+        closeAuthModal();
         await openBillingView('input-section');
     });
 
