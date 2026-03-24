@@ -80,13 +80,6 @@
             color: var(--text-main);
         }
 
-        .header-copy p:last-child {
-            margin-top: 6px;
-            font-size: 12px;
-            color: var(--text-sub);
-            line-height: 1.5;
-        }
-
         .header-auth-btn {
             flex-shrink: 0;
             border: none;
@@ -136,27 +129,6 @@
             font-size: 14px;
         }
 
-        .quick-guide {
-            margin-bottom: 20px;
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid #ffd8cf;
-            background: linear-gradient(135deg, #fff6f2 0%, #fffdfc 100%);
-        }
-
-        .quick-guide strong {
-            display: block;
-            font-size: 14px;
-            color: #c75643;
-        }
-
-        .quick-guide p {
-            margin-top: 6px;
-            font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-sub);
-        }
-
         .input-group {
             margin-bottom: 20px;
         }
@@ -192,6 +164,39 @@
             background: #f2f4f7;
             color: #9ca3af;
             cursor: not-allowed;
+        }
+
+        .date-input-shell {
+            position: relative;
+        }
+
+        .date-input-shell input[type="text"] {
+            padding-right: 56px;
+        }
+
+        .date-picker-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            color: var(--text-main);
+            pointer-events: none;
+        }
+
+        .date-picker-proxy {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 56px;
+            height: 100%;
+            border: none;
+            opacity: 0;
+            cursor: pointer;
         }
 
         .radio-group {
@@ -833,7 +838,6 @@
             <div class="header-copy">
                 <p class="header-eyebrow">Fortunetelling Beta</p>
                 <h1>AI 사주 마스터</h1>
-                <p>로그인 없이 바로 조회하고, 저장이 필요할 때만 계정을 열어두세요.</p>
             </div>
             <button id="header-auth-btn" class="header-auth-btn" type="button">로그인</button>
         </div>
@@ -843,11 +847,6 @@
         <div class="title-area">
             <h2>당신의 운명의 바코드를<br>해독해 드립니다.</h2>
             <p>정확한 사주풀이를 위해 정보를 입력해주세요.</p>
-        </div>
-
-        <div class="quick-guide">
-            <strong>비회원도 바로 조회 가능합니다</strong>
-            <p>이름과 생년월일, 출생시간만 입력하면 바로 분석합니다. 로그인은 결과 저장이나 결제가 필요할 때만 사용하면 됩니다.</p>
         </div>
 
         <div id="input-ad-slot" class="ad-slot" hidden>
@@ -878,7 +877,36 @@
 
         <div class="input-group">
             <label for="birthdate">생년월일</label>
-            <input type="date" id="birthdate" required>
+            <div class="date-input-shell">
+                <input
+                    type="text"
+                    id="birthdate"
+                    inputmode="numeric"
+                    autocomplete="bday"
+                    placeholder="YYYYMMDD"
+                    maxlength="10"
+                    required
+                >
+                <span class="date-picker-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </span>
+                <input
+                    type="date"
+                    id="birthdate-picker"
+                    class="date-picker-proxy"
+                    value="2000-01-01"
+                    min="1900-01-01"
+                    max="2050-12-31"
+                    tabindex="-1"
+                    aria-label="생년월일 달력"
+                >
+            </div>
+            <p class="helper-text">숫자 8자리로 입력하면 자동으로 날짜를 인식합니다.</p>
         </div>
 
         <div class="input-group">
@@ -1170,6 +1198,8 @@
 
     const analyzeBtn = document.getElementById('analyze-btn');
     const inputError = document.getElementById('input-error');
+    const birthDateInput = document.getElementById('birthdate');
+    const birthDatePicker = document.getElementById('birthdate-picker');
     const birthTimeSelect = document.getElementById('birthtime');
 
     const reportTitle = document.getElementById('report-title');
@@ -1268,6 +1298,59 @@
     function formatBirthDate(dateText) {
         const [year, month, day] = String(dateText).split('-');
         return `${year}년 ${Number(month)}월 ${Number(day)}일`;
+    }
+
+    function toBirthDateDigits(value) {
+        return String(value || '')
+            .replace(/\D/g, '')
+            .slice(0, 8);
+    }
+
+    function formatBirthDateInputValue(value) {
+        const digits = toBirthDateDigits(value);
+
+        if (digits.length <= 4) {
+            return digits;
+        }
+
+        if (digits.length <= 6) {
+            return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+        }
+
+        return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+    }
+
+    function normalizeBirthDateValue(value) {
+        const digits = toBirthDateDigits(value);
+
+        if (digits.length !== 8) {
+            return '';
+        }
+
+        return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+    }
+
+    function isValidBirthDate(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
+            return false;
+        }
+
+        const [yearText, monthText, dayText] = value.split('-');
+        const year = Number(yearText);
+        const month = Number(monthText);
+        const day = Number(dayText);
+        const date = new Date(Date.UTC(year, month - 1, day));
+
+        return (
+            date.getUTCFullYear() === year
+            && date.getUTCMonth() === month - 1
+            && date.getUTCDate() === day
+        );
+    }
+
+    function syncBirthDatePickerValue() {
+        const normalized = normalizeBirthDateValue(birthDateInput.value);
+        birthDatePicker.value = isValidBirthDate(normalized) ? normalized : '2000-01-01';
     }
 
     function formatDateTime(value) {
@@ -1371,13 +1454,17 @@
     function readProfileFromForm() {
         const name = document.getElementById('name').value.trim() || '고객';
         const gender = getSelectedValue('gender');
-        const birthDate = document.getElementById('birthdate').value;
+        const birthDate = normalizeBirthDateValue(birthDateInput.value);
         const calendarType = getSelectedValue('calendar');
         const birthTimeUnknown = getSelectedValue('timeKnown') === 'unknown';
         const birthTime = birthTimeSelect.value;
 
         if (!birthDate) {
-            throw new Error('생년월일을 입력해주세요.');
+            throw new Error('생년월일을 8자리로 입력해주세요.');
+        }
+
+        if (!isValidBirthDate(birthDate)) {
+            throw new Error('생년월일 형식이 올바르지 않습니다.');
         }
 
         if (!birthTimeUnknown && !birthTime) {
@@ -2358,6 +2445,21 @@
         input.addEventListener('change', updateBirthTimeMode);
     });
 
+    birthDateInput.addEventListener('input', () => {
+        birthDateInput.value = formatBirthDateInputValue(birthDateInput.value);
+        syncBirthDatePickerValue();
+    });
+
+    birthDatePicker.addEventListener('pointerdown', syncBirthDatePickerValue);
+    birthDatePicker.addEventListener('focus', syncBirthDatePickerValue);
+    birthDatePicker.addEventListener('change', () => {
+        if (!birthDatePicker.value) {
+            return;
+        }
+
+        birthDateInput.value = birthDatePicker.value;
+    });
+
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', async () => {
             const type = tab.dataset.type;
@@ -2432,6 +2534,7 @@
     billingPurchaseBtn.addEventListener('click', handleBillingPurchase);
     billingBackBtn.addEventListener('click', goBackFromBilling);
 
+    syncBirthDatePickerValue();
     updateBirthTimeMode();
     initializeAuth();
 </script>
