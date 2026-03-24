@@ -1,20 +1,8 @@
 const ALLOWED_GENDERS = new Set(["male", "female"]);
 const ALLOWED_CALENDARS = new Set(["solar", "lunar"]);
 const ALLOWED_TYPES = new Set(["overall", "daily", "monthly", "yearly"]);
-const ALLOWED_BIRTHTIMES = new Set([
-  "자시",
-  "축시",
-  "인시",
-  "묘시",
-  "진시",
-  "사시",
-  "오시",
-  "미시",
-  "신시",
-  "유시",
-  "술시",
-  "해시"
-]);
+import { resolveBirthTime } from "./birth-time.js";
+
 const SUPPORTED_MIN_YEAR = 1900;
 const SUPPORTED_MAX_YEAR = 2050;
 
@@ -58,6 +46,7 @@ export function validateAnalyzePayload(payload) {
   const calendarType = normalizeText(profile.calendarType);
   const birthTimeUnknown = Boolean(profile.birthTimeUnknown);
   const birthTime = normalizeText(profile.birthTime);
+  const resolvedBirthTime = birthTimeUnknown ? null : resolveBirthTime(birthTime);
 
   if (!ALLOWED_GENDERS.has(gender)) {
     throw new Error("성별 값이 올바르지 않습니다.");
@@ -78,8 +67,8 @@ export function validateAnalyzePayload(payload) {
     throw new Error("양력/음력 값이 올바르지 않습니다.");
   }
 
-  if (!birthTimeUnknown && !ALLOWED_BIRTHTIMES.has(birthTime)) {
-    throw new Error("태어난 시간 값이 올바르지 않습니다.");
+  if (!birthTimeUnknown && !resolvedBirthTime) {
+    throw new Error("태어난 시간은 예: 오전 7:30, 오후 3, 19:20 형태로 입력해주세요.");
   }
 
   if (!ALLOWED_TYPES.has(type)) {
@@ -93,7 +82,8 @@ export function validateAnalyzePayload(payload) {
       birthDate,
       calendarType,
       birthTimeUnknown,
-      birthTime: birthTimeUnknown ? "" : birthTime
+      birthTime: birthTimeUnknown ? "" : resolvedBirthTime.display,
+      birthTimeLabel: birthTimeUnknown ? "" : resolvedBirthTime.label
     },
     type
   };

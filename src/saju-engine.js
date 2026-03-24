@@ -1,4 +1,5 @@
 import { calculateSaju, lunarToSolar } from "@fullstackfamily/manseryeok";
+import { resolveBirthTime } from "./birth-time.js";
 
 const STEM_ELEMENT = {
   甲: "wood",
@@ -34,22 +35,6 @@ const ELEMENT_COLORS = {
   earth: "#A1887F",
   metal: "#546E7A",
   water: "#1565C0"
-};
-
-// UI의 시각 선택값(자시~해시)을 라이브러리 입력 시각으로 매핑한다.
-const BIRTHTIME_TO_CLOCK = {
-  자시: { hour: 23, minute: 30 },
-  축시: { hour: 1, minute: 30 },
-  인시: { hour: 3, minute: 30 },
-  묘시: { hour: 5, minute: 30 },
-  진시: { hour: 7, minute: 30 },
-  사시: { hour: 9, minute: 30 },
-  오시: { hour: 11, minute: 30 },
-  미시: { hour: 13, minute: 30 },
-  신시: { hour: 15, minute: 30 },
-  유시: { hour: 17, minute: 30 },
-  술시: { hour: 19, minute: 30 },
-  해시: { hour: 21, minute: 30 }
 };
 
 function splitBirthDate(birthDate) {
@@ -124,7 +109,7 @@ function buildSajuArgs(profile, solarDate) {
     return [solarDate.year, solarDate.month, solarDate.day];
   }
 
-  const clock = BIRTHTIME_TO_CLOCK[profile.birthTime];
+  const clock = resolveBirthTime(profile.birthTime);
   if (!clock) {
     return [solarDate.year, solarDate.month, solarDate.day];
   }

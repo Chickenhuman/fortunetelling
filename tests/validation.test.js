@@ -10,14 +10,15 @@ test("validateAnalyzePayload accepts a valid payload", () => {
       birthDate: "1995-02-14",
       calendarType: "solar",
       birthTimeUnknown: false,
-      birthTime: "오시"
+      birthTime: "오후 12:10"
     },
     type: "overall"
   });
 
   assert.equal(validated.type, "overall");
   assert.equal(validated.profile.birthDate, "1995-02-14");
-  assert.equal(validated.profile.birthTime, "오시");
+  assert.equal(validated.profile.birthTime, "오후 12:10");
+  assert.equal(validated.profile.birthTimeLabel, "오시");
 });
 
 test("validateAnalyzePayload rejects years outside 1900~2050", () => {

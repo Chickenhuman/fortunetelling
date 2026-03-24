@@ -91,7 +91,8 @@ function createHistorySummary(history) {
       birthDate: history.profile.birthDate,
       calendarType: history.profile.calendarType,
       birthTimeUnknown: history.profile.birthTimeUnknown,
-      birthTime: history.profile.birthTime
+      birthTime: history.profile.birthTime,
+      birthTimeLabel: history.profile.birthTimeLabel || ""
     },
     report: {
       title: history.analysis.report.title,

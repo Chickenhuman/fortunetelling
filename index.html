@@ -946,22 +946,8 @@
                     <label for="time-unknown">모름</label>
                 </div>
             </div>
-            <select id="birthtime">
-                <option value="">시간을 선택하세요</option>
-                <option value="자시">자시 (23:30 ~ 01:29)</option>
-                <option value="축시">축시 (01:30 ~ 03:29)</option>
-                <option value="인시">인시 (03:30 ~ 05:29)</option>
-                <option value="묘시">묘시 (05:30 ~ 07:29)</option>
-                <option value="진시">진시 (07:30 ~ 09:29)</option>
-                <option value="사시">사시 (09:30 ~ 11:29)</option>
-                <option value="오시">오시 (11:30 ~ 13:29)</option>
-                <option value="미시">미시 (13:30 ~ 15:29)</option>
-                <option value="신시">신시 (15:30 ~ 17:29)</option>
-                <option value="유시">유시 (17:30 ~ 19:29)</option>
-                <option value="술시">술시 (19:30 ~ 21:29)</option>
-                <option value="해시">해시 (21:30 ~ 23:29)</option>
-            </select>
-            <p class="helper-text">모름 선택 시 시주는 비워두고 분석합니다.</p>
+            <input type="text" id="birthtime" placeholder="예: 오전 7:30 / 오후 3:15 / 19:20">
+            <p class="helper-text">직접 입력하면 자시·축시 등 시주를 자동으로 해석합니다. 모름 선택 시 시주는 비워둡니다.</p>
         </div>
 
         <p id="input-error" class="error-text"></p>
@@ -970,7 +956,7 @@
 
     <section id="result-section" class="section">
         <div class="user-info">
-            <h2 id="result-name">고객님의 사주</h2>
+            <h2 id="result-name"></h2>
             <p id="result-meta"></p>
         </div>
 
@@ -1011,9 +997,9 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7E67" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                 </svg>
-                <span id="report-title">AI 종합 사주풀이</span>
+                <span id="report-title"></span>
             </div>
-            <div id="report-content" class="loading">분석을 준비하고 있습니다...</div>
+            <div id="report-content"></div>
             <button id="retry-report-btn" class="retry-btn" hidden>다시 시도</button>
             <div id="provider-tag" class="provider-tag"></div>
             <div id="history-save-status" class="history-save-status"></div>
@@ -1108,7 +1094,7 @@
                 <div class="auth-modal-title">
                     <p>Account</p>
                     <h2 id="auth-modal-title">로그인</h2>
-                    <span>비회원 조회는 바로 가능하고, 로그인은 저장 기능이 필요할 때만 사용하면 됩니다.</span>
+                    <span>필요할 때만 로그인해서 저장 기능을 쓰면 됩니다.</span>
                 </div>
                 <button id="auth-close-btn" class="auth-close-btn" type="button">닫기</button>
             </div>
@@ -1135,7 +1121,6 @@
                         <input type="text" id="auth-displayname" placeholder="홍길동" autocomplete="name">
                     </div>
 
-                    <p class="helper-text auth-logged-out-tip">지금은 로그인 없이도 사주 조회를 바로 테스트할 수 있습니다.</p>
                     <p id="auth-error" class="error-text" style="min-height: 16px;"></p>
                     <button id="auth-submit-btn" class="submit-btn auth-submit-btn" type="button">로그인</button>
                 </div>
@@ -1156,7 +1141,7 @@
     </div>
 
     <footer class="app-footer">
-        <small id="app-version" class="app-version">Ver 0.1.0004 (2026.03.24. 07:09 UTC Update)</small>
+        <small id="app-version" class="app-version">Ver 0.1.0005 (2026.03.24. 07:24 UTC Update)</small>
     </footer>
 </div>
 
@@ -1215,7 +1200,7 @@
     const inputError = document.getElementById('input-error');
     const birthDateInput = document.getElementById('birthdate');
     const birthDatePicker = document.getElementById('birthdate-picker');
-    const birthTimeSelect = document.getElementById('birthtime');
+    const birthTimeInput = document.getElementById('birthtime');
 
     const reportTitle = document.getElementById('report-title');
     const reportContent = document.getElementById('report-content');
@@ -1345,6 +1330,151 @@
         return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
     }
 
+    const BIRTH_TIME_SLOTS = [
+        { label: '자시', startMinute: 23 * 60 + 30, endMinute: 1 * 60 + 29, fallbackHour: 23, fallbackMinute: 30 },
+        { label: '축시', startMinute: 1 * 60 + 30, endMinute: 3 * 60 + 29, fallbackHour: 1, fallbackMinute: 30 },
+        { label: '인시', startMinute: 3 * 60 + 30, endMinute: 5 * 60 + 29, fallbackHour: 3, fallbackMinute: 30 },
+        { label: '묘시', startMinute: 5 * 60 + 30, endMinute: 7 * 60 + 29, fallbackHour: 5, fallbackMinute: 30 },
+        { label: '진시', startMinute: 7 * 60 + 30, endMinute: 9 * 60 + 29, fallbackHour: 7, fallbackMinute: 30 },
+        { label: '사시', startMinute: 9 * 60 + 30, endMinute: 11 * 60 + 29, fallbackHour: 9, fallbackMinute: 30 },
+        { label: '오시', startMinute: 11 * 60 + 30, endMinute: 13 * 60 + 29, fallbackHour: 11, fallbackMinute: 30 },
+        { label: '미시', startMinute: 13 * 60 + 30, endMinute: 15 * 60 + 29, fallbackHour: 13, fallbackMinute: 30 },
+        { label: '신시', startMinute: 15 * 60 + 30, endMinute: 17 * 60 + 29, fallbackHour: 15, fallbackMinute: 30 },
+        { label: '유시', startMinute: 17 * 60 + 30, endMinute: 19 * 60 + 29, fallbackHour: 17, fallbackMinute: 30 },
+        { label: '술시', startMinute: 19 * 60 + 30, endMinute: 21 * 60 + 29, fallbackHour: 19, fallbackMinute: 30 },
+        { label: '해시', startMinute: 21 * 60 + 30, endMinute: 23 * 60 + 29, fallbackHour: 21, fallbackMinute: 30 }
+    ];
+
+    function normalizeBirthTimeText(value) {
+        return String(value || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function compactBirthTimeText(value) {
+        return normalizeBirthTimeText(value)
+            .toLowerCase()
+            .replace(/\./g, '')
+            .replace(/\s+/g, '');
+    }
+
+    function isMinuteInBirthTimeSlot(totalMinute, slot) {
+        if (slot.startMinute <= slot.endMinute) {
+            return totalMinute >= slot.startMinute && totalMinute <= slot.endMinute;
+        }
+
+        return totalMinute >= slot.startMinute || totalMinute <= slot.endMinute;
+    }
+
+    function resolveBirthTimeLabel(totalMinute) {
+        const matchedSlot = BIRTH_TIME_SLOTS.find(slot => isMinuteInBirthTimeSlot(totalMinute, slot));
+        return matchedSlot ? matchedSlot.label : '';
+    }
+
+    function formatTypedBirthTime(hour, minute) {
+        const meridiem = hour < 12 ? '오전' : '오후';
+        const hour12 = hour % 12 || 12;
+        return `${meridiem} ${hour12}:${String(minute).padStart(2, '0')}`;
+    }
+
+    function parseTypedBirthTime(value) {
+        const rawValue = normalizeBirthTimeText(value);
+        if (!rawValue) {
+            return null;
+        }
+
+        const directSlot = BIRTH_TIME_SLOTS.find(slot => slot.label === rawValue);
+        if (directSlot) {
+            return {
+                birthTime: rawValue,
+                birthTimeLabel: rawValue,
+                hour: directSlot.fallbackHour,
+                minute: directSlot.fallbackMinute
+            };
+        }
+
+        let normalized = compactBirthTimeText(rawValue);
+        let meridiem = '';
+
+        if (normalized.startsWith('오전')) {
+            meridiem = 'am';
+            normalized = normalized.slice(2);
+        } else if (normalized.startsWith('오후')) {
+            meridiem = 'pm';
+            normalized = normalized.slice(2);
+        } else if (normalized.startsWith('am')) {
+            meridiem = 'am';
+            normalized = normalized.slice(2);
+        } else if (normalized.startsWith('pm')) {
+            meridiem = 'pm';
+            normalized = normalized.slice(2);
+        }
+
+        normalized = normalized.replace(/분/g, '').replace(/시/g, ':').replace(/:+$/, '');
+
+        let hourText = '';
+        let minuteText = '0';
+
+        if (/^\d{1,2}:\d{1,2}$/.test(normalized)) {
+            [hourText, minuteText] = normalized.split(':');
+        } else if (/^\d{3,4}$/.test(normalized)) {
+            if (normalized.length === 3) {
+                hourText = normalized.slice(0, 1);
+                minuteText = normalized.slice(1);
+            } else {
+                hourText = normalized.slice(0, 2);
+                minuteText = normalized.slice(2);
+            }
+        } else if (/^\d{1,2}$/.test(normalized)) {
+            hourText = normalized;
+        } else {
+            return null;
+        }
+
+        let hour = Number(hourText);
+        const minute = Number(minuteText);
+
+        if (!Number.isInteger(hour) || !Number.isInteger(minute) || minute < 0 || minute > 59) {
+            return null;
+        }
+
+        if (meridiem) {
+            if (hour < 1 || hour > 12) {
+                return null;
+            }
+
+            if (meridiem === 'am') {
+                hour = hour === 12 ? 0 : hour;
+            } else {
+                hour = hour === 12 ? 12 : hour + 12;
+            }
+        } else if (hour < 0 || hour > 23) {
+            return null;
+        }
+
+        const birthTimeLabel = resolveBirthTimeLabel(hour * 60 + minute);
+        if (!birthTimeLabel) {
+            return null;
+        }
+
+        return {
+            birthTime: formatTypedBirthTime(hour, minute),
+            birthTimeLabel,
+            hour,
+            minute
+        };
+    }
+
+    function formatBirthTimeForDisplay(profile) {
+        if (profile.birthTimeUnknown) {
+            return '출생시간 모름';
+        }
+
+        if (profile.birthTimeLabel && profile.birthTimeLabel !== profile.birthTime) {
+            return `${profile.birthTime} (${profile.birthTimeLabel})`;
+        }
+
+        return profile.birthTime || '-';
+    }
+
     function isValidBirthDate(value) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
             return false;
@@ -1458,11 +1588,30 @@
         }
     }
 
+    function resetResultView() {
+        document.getElementById('result-name').textContent = '';
+        document.getElementById('result-meta').textContent = '';
+        reportTitle.textContent = '';
+        reportContent.className = '';
+        reportContent.textContent = '';
+        retryReportBtn.hidden = true;
+        providerTag.textContent = '';
+        historySaveStatus.textContent = '';
+        fillPillarText('pillar-year-stem', '-', '#9ca3af');
+        fillPillarText('pillar-year-branch', '-', '#9ca3af');
+        fillPillarText('pillar-month-stem', '-', '#9ca3af');
+        fillPillarText('pillar-month-branch', '-', '#9ca3af');
+        fillPillarText('pillar-day-stem', '-', '#9ca3af');
+        fillPillarText('pillar-day-branch', '-', '#9ca3af');
+        fillPillarText('pillar-hour-stem', '-', '#9ca3af');
+        fillPillarText('pillar-hour-branch', '-', '#9ca3af');
+    }
+
     function updateBirthTimeMode() {
         const isUnknown = getSelectedValue('timeKnown') === 'unknown';
-        birthTimeSelect.disabled = isUnknown;
+        birthTimeInput.disabled = isUnknown;
         if (isUnknown) {
-            birthTimeSelect.value = '';
+            birthTimeInput.value = '';
         }
     }
 
@@ -1472,7 +1621,8 @@
         const birthDate = normalizeBirthDateValue(birthDateInput.value);
         const calendarType = getSelectedValue('calendar');
         const birthTimeUnknown = getSelectedValue('timeKnown') === 'unknown';
-        const birthTime = birthTimeSelect.value;
+        const birthTimeValue = birthTimeInput.value;
+        const resolvedBirthTime = birthTimeUnknown ? null : parseTypedBirthTime(birthTimeValue);
 
         if (!birthDate) {
             throw new Error('생년월일을 8자리로 입력해주세요.');
@@ -1482,8 +1632,12 @@
             throw new Error('생년월일 형식이 올바르지 않습니다.');
         }
 
-        if (!birthTimeUnknown && !birthTime) {
-            throw new Error('출생 시간을 선택하거나 모름을 선택해주세요.');
+        if (!birthTimeUnknown && !birthTimeValue.trim()) {
+            throw new Error('출생 시간을 입력하거나 모름을 선택해주세요.');
+        }
+
+        if (!birthTimeUnknown && !resolvedBirthTime) {
+            throw new Error('출생 시간은 예: 오전 7:30, 오후 3, 19:20 형태로 입력해주세요.');
         }
 
         return {
@@ -1492,7 +1646,8 @@
             birthDate,
             calendarType,
             birthTimeUnknown,
-            birthTime: birthTimeUnknown ? '' : birthTime
+            birthTime: birthTimeUnknown ? '' : resolvedBirthTime.birthTime,
+            birthTimeLabel: birthTimeUnknown ? '' : resolvedBirthTime.birthTimeLabel
         };
     }
 
@@ -1573,7 +1728,7 @@
 
     function updateUserInfo(profile) {
         const calendarLabel = profile.calendarType === 'solar' ? '양력' : '음력';
-        const timeLabel = profile.birthTimeUnknown ? '출생시간 모름' : profile.birthTime;
+        const timeLabel = formatBirthTimeForDisplay(profile);
 
         document.getElementById('result-name').textContent = `${profile.name}님의 사주`;
         document.getElementById('result-meta').textContent = `${formatBirthDate(profile.birthDate)} (${calendarLabel}) ${timeLabel}`;
@@ -2263,6 +2418,7 @@
     }
 
     function goBack() {
+        resetResultView();
         setActiveSection('input-section');
         window.scrollTo(0, 0);
     }
@@ -2300,7 +2456,7 @@
     function renderHistoryDetail(detail) {
         const profile = detail.profile;
         const calendarLabel = profile.calendarType === 'solar' ? '양력' : '음력';
-        const timeLabel = profile.birthTimeUnknown ? '출생시간 모름' : profile.birthTime;
+        const timeLabel = formatBirthTimeForDisplay(profile);
 
         historyDetailCard.hidden = false;
         historyDetailTitle.textContent = detail.analysis.report.title;
@@ -2493,6 +2649,17 @@
         birthDateInput.value = birthDatePicker.value;
     });
 
+    birthTimeInput.addEventListener('blur', () => {
+        if (birthTimeInput.disabled) {
+            return;
+        }
+
+        const resolved = parseTypedBirthTime(birthTimeInput.value);
+        if (resolved) {
+            birthTimeInput.value = resolved.birthTime;
+        }
+    });
+
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', async () => {
             const type = tab.dataset.type;
@@ -2567,6 +2734,7 @@
     billingPurchaseBtn.addEventListener('click', handleBillingPurchase);
     billingBackBtn.addEventListener('click', goBackFromBilling);
 
+    resetResultView();
     syncBirthDatePickerValue();
     updateBirthTimeMode();
     initializeAuth();

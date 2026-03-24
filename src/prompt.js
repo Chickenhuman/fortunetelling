@@ -22,6 +22,18 @@ function pillarLine(label, pillar) {
   return `${label}: ${pillar.stem}${pillar.branch}`;
 }
 
+function formatBirthTime(profile) {
+  if (profile.birthTimeUnknown) {
+    return "모름";
+  }
+
+  if (profile.birthTimeLabel && profile.birthTimeLabel !== profile.birthTime) {
+    return `${profile.birthTime} (${profile.birthTimeLabel})`;
+  }
+
+  return profile.birthTime;
+}
+
 export function getTypeLabel(type) {
   return TYPE_LABELS[type] ?? "사주풀이";
 }
@@ -49,7 +61,7 @@ export function buildUserPrompt({ profile, type, pillars }) {
     `[성별] ${GENDER_LABELS[profile.gender]}`,
     `[생년월일] ${profile.birthDate}`,
     `[달력 기준] ${CALENDAR_LABELS[profile.calendarType]}`,
-    `[출생시간] ${profile.birthTimeUnknown ? "모름" : profile.birthTime}`,
+    `[출생시간] ${formatBirthTime(profile)}`,
     "[명식 참고값 - 임시 계산 결과]",
     pillarLine("년주", pillars.year),
     pillarLine("월주", pillars.month),

@@ -81,7 +81,7 @@ test("POST /api/analyze returns success payload", async () => {
         birthDate: "1995-02-14",
         calendarType: "solar",
         birthTimeUnknown: false,
-        birthTime: "오시"
+        birthTime: "오후 12:10"
       },
       type: "overall"
     })
@@ -94,6 +94,7 @@ test("POST /api/analyze returns success payload", async () => {
   assert.equal(typeof payload.data.meta.provider, "string");
   assert.equal(typeof payload.data.pillars.year.stem, "string");
   assert.equal(typeof payload.data.report.title, "string");
+  assert.equal(payload.data.pillars.hour.branch, "午");
 });
 
 test("POST /api/analyze returns standardized validation error", async () => {
