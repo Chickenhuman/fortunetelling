@@ -1156,7 +1156,7 @@
     </div>
 
     <footer class="app-footer">
-        <small id="app-version" class="app-version">Ver 0.1.0001 (2026.03.24. 04:43 UTC Update)</small>
+        <small id="app-version" class="app-version">Ver 0.1.0002 (2026.03.24. 04:51 UTC Update)</small>
     </footer>
 </div>
 
@@ -1621,8 +1621,26 @@
         try {
             return JSON.parse(responseText);
         } catch {
+            const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+            const preview = responseText.trim().slice(0, 120).toLowerCase();
+            const looksLikeHtml = contentType.includes('text/html')
+                || preview.startsWith('<!doctype')
+                || preview.startsWith('<html');
+            const isGithubPages = window.location.hostname.endsWith('github.io');
+            const isApiRequest = response.url.includes('/api/');
+
+            if (looksLikeHtml && isGithubPages && isApiRequest) {
+                throw createClientError({
+                    message: '현재 GitHub Pages 정적 페이지에는 분석 API 서버가 없습니다. 로컬 서버(http://localhost:3000)로 접속하거나 별도 API 서버를 연결해야 합니다.',
+                    code: 'API_BACKEND_UNAVAILABLE',
+                    retryable: false
+                });
+            }
+
             throw createClientError({
-                message: '서버 응답을 해석할 수 없습니다.',
+                message: looksLikeHtml
+                    ? `서버가 JSON 대신 HTML을 반환했습니다. (${response.status})`
+                    : `서버 응답을 해석할 수 없습니다. (${response.status})`,
                 code: 'INVALID_SERVER_RESPONSE',
                 retryable: false
             });
