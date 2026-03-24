@@ -238,6 +238,25 @@
             color: var(--text-sub);
         }
 
+        .time-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .time-row .radio-group {
+            flex: 0 0 168px;
+        }
+
+        .time-row .time-input {
+            flex: 1;
+        }
+
+        .radio-group.is-disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
         .error-text {
             margin-bottom: 12px;
             color: var(--danger-color);
@@ -946,8 +965,27 @@
                     <label for="time-unknown">모름</label>
                 </div>
             </div>
-            <input type="text" id="birthtime" placeholder="예: 오전 7:30 / 오후 3:15 / 19:20">
-            <p class="helper-text">직접 입력하면 자시·축시 등 시주를 자동으로 해석합니다. 모름 선택 시 시주는 비워둡니다.</p>
+            <div class="time-row">
+                <div id="birth-meridiem-group" class="radio-group">
+                    <div class="radio-btn">
+                        <input type="radio" name="birthMeridiem" id="birth-am" value="am">
+                        <label for="birth-am">오전</label>
+                    </div>
+                    <div class="radio-btn">
+                        <input type="radio" name="birthMeridiem" id="birth-pm" value="pm">
+                        <label for="birth-pm">오후</label>
+                    </div>
+                </div>
+                <input
+                    type="text"
+                    id="birthtime"
+                    class="time-input"
+                    inputmode="numeric"
+                    maxlength="4"
+                    placeholder="예: 730 또는 1230"
+                >
+            </div>
+            <p class="helper-text">오전/오후를 먼저 선택하고 숫자만 입력하세요. `730`은 7:30, `3`은 3:00으로 인식합니다.</p>
         </div>
 
         <p id="input-error" class="error-text"></p>
@@ -1141,7 +1179,7 @@
     </div>
 
     <footer class="app-footer">
-        <small id="app-version" class="app-version">Ver 0.1.0005 (2026.03.24. 07:24 UTC Update)</small>
+        <small id="app-version" class="app-version">Ver 0.1.0006 (2026.03.24. 07:35 UTC Update)</small>
     </footer>
 </div>
 
@@ -1201,6 +1239,8 @@
     const birthDateInput = document.getElementById('birthdate');
     const birthDatePicker = document.getElementById('birthdate-picker');
     const birthTimeInput = document.getElementById('birthtime');
+    const birthMeridiemGroup = document.getElementById('birth-meridiem-group');
+    const birthMeridiemInputs = document.querySelectorAll('input[name="birthMeridiem"]');
 
     const reportTitle = document.getElementById('report-title');
     const reportContent = document.getElementById('report-content');
@@ -1346,14 +1386,7 @@
     ];
 
     function normalizeBirthTimeText(value) {
-        return String(value || '').trim().replace(/\s+/g, ' ');
-    }
-
-    function compactBirthTimeText(value) {
-        return normalizeBirthTimeText(value)
-            .toLowerCase()
-            .replace(/\./g, '')
-            .replace(/\s+/g, '');
+        return String(value || '').replace(/\D/g, '').slice(0, 4);
     }
 
     function isMinuteInBirthTimeSlot(totalMinute, slot) {
@@ -1369,98 +1402,70 @@
         return matchedSlot ? matchedSlot.label : '';
     }
 
-    function formatTypedBirthTime(hour, minute) {
-        const meridiem = hour < 12 ? '오전' : '오후';
-        const hour12 = hour % 12 || 12;
+    function formatTypedBirthTime(hour24, minute) {
+        const meridiem = hour24 < 12 ? '오전' : '오후';
+        const hour12 = hour24 % 12 || 12;
         return `${meridiem} ${hour12}:${String(minute).padStart(2, '0')}`;
     }
 
-    function parseTypedBirthTime(value) {
-        const rawValue = normalizeBirthTimeText(value);
-        if (!rawValue) {
+    function parseTypedBirthTime(value, meridiem) {
+        const digits = normalizeBirthTimeText(value);
+        if (!digits || !meridiem) {
             return null;
         }
-
-        const directSlot = BIRTH_TIME_SLOTS.find(slot => slot.label === rawValue);
-        if (directSlot) {
-            return {
-                birthTime: rawValue,
-                birthTimeLabel: rawValue,
-                hour: directSlot.fallbackHour,
-                minute: directSlot.fallbackMinute
-            };
-        }
-
-        let normalized = compactBirthTimeText(rawValue);
-        let meridiem = '';
-
-        if (normalized.startsWith('오전')) {
-            meridiem = 'am';
-            normalized = normalized.slice(2);
-        } else if (normalized.startsWith('오후')) {
-            meridiem = 'pm';
-            normalized = normalized.slice(2);
-        } else if (normalized.startsWith('am')) {
-            meridiem = 'am';
-            normalized = normalized.slice(2);
-        } else if (normalized.startsWith('pm')) {
-            meridiem = 'pm';
-            normalized = normalized.slice(2);
-        }
-
-        normalized = normalized.replace(/분/g, '').replace(/시/g, ':').replace(/:+$/, '');
 
         let hourText = '';
         let minuteText = '0';
 
-        if (/^\d{1,2}:\d{1,2}$/.test(normalized)) {
-            [hourText, minuteText] = normalized.split(':');
-        } else if (/^\d{3,4}$/.test(normalized)) {
-            if (normalized.length === 3) {
-                hourText = normalized.slice(0, 1);
-                minuteText = normalized.slice(1);
-            } else {
-                hourText = normalized.slice(0, 2);
-                minuteText = normalized.slice(2);
-            }
-        } else if (/^\d{1,2}$/.test(normalized)) {
-            hourText = normalized;
+        if (digits.length <= 2) {
+            hourText = digits;
+        } else if (digits.length === 3) {
+            hourText = digits.slice(0, 1);
+            minuteText = digits.slice(1);
+        } else if (digits.length === 4) {
+            hourText = digits.slice(0, 2);
+            minuteText = digits.slice(2);
         } else {
             return null;
         }
 
-        let hour = Number(hourText);
+        const hour12 = Number(hourText);
         const minute = Number(minuteText);
 
-        if (!Number.isInteger(hour) || !Number.isInteger(minute) || minute < 0 || minute > 59) {
+        if (!Number.isInteger(hour12) || !Number.isInteger(minute) || hour12 < 1 || hour12 > 12 || minute < 0 || minute > 59) {
             return null;
         }
 
-        if (meridiem) {
-            if (hour < 1 || hour > 12) {
-                return null;
-            }
-
-            if (meridiem === 'am') {
-                hour = hour === 12 ? 0 : hour;
-            } else {
-                hour = hour === 12 ? 12 : hour + 12;
-            }
-        } else if (hour < 0 || hour > 23) {
+        let hour24 = hour12;
+        if (meridiem === 'am') {
+            hour24 = hour12 === 12 ? 0 : hour12;
+        } else if (meridiem === 'pm') {
+            hour24 = hour12 === 12 ? 12 : hour12 + 12;
+        } else {
             return null;
         }
 
-        const birthTimeLabel = resolveBirthTimeLabel(hour * 60 + minute);
+        const birthTimeLabel = resolveBirthTimeLabel(hour24 * 60 + minute);
         if (!birthTimeLabel) {
             return null;
         }
 
         return {
-            birthTime: formatTypedBirthTime(hour, minute),
+            birthTime: formatTypedBirthTime(hour24, minute),
             birthTimeLabel,
-            hour,
+            hour: hour24,
             minute
         };
+    }
+
+    function formatBirthTimeDigitsForInput(value) {
+        return normalizeBirthTimeText(value);
+    }
+
+    function clearBirthMeridiemSelection() {
+        birthMeridiemInputs.forEach(input => {
+            input.checked = false;
+        });
     }
 
     function formatBirthTimeForDisplay(profile) {
@@ -1610,8 +1615,13 @@
     function updateBirthTimeMode() {
         const isUnknown = getSelectedValue('timeKnown') === 'unknown';
         birthTimeInput.disabled = isUnknown;
+        birthMeridiemGroup.classList.toggle('is-disabled', isUnknown);
+        birthMeridiemInputs.forEach(input => {
+            input.disabled = isUnknown;
+        });
         if (isUnknown) {
             birthTimeInput.value = '';
+            clearBirthMeridiemSelection();
         }
     }
 
@@ -1621,8 +1631,9 @@
         const birthDate = normalizeBirthDateValue(birthDateInput.value);
         const calendarType = getSelectedValue('calendar');
         const birthTimeUnknown = getSelectedValue('timeKnown') === 'unknown';
-        const birthTimeValue = birthTimeInput.value;
-        const resolvedBirthTime = birthTimeUnknown ? null : parseTypedBirthTime(birthTimeValue);
+        const birthMeridiem = getSelectedValue('birthMeridiem');
+        const birthTimeValue = formatBirthTimeDigitsForInput(birthTimeInput.value);
+        const resolvedBirthTime = birthTimeUnknown ? null : parseTypedBirthTime(birthTimeValue, birthMeridiem);
 
         if (!birthDate) {
             throw new Error('생년월일을 8자리로 입력해주세요.');
@@ -1633,11 +1644,15 @@
         }
 
         if (!birthTimeUnknown && !birthTimeValue.trim()) {
-            throw new Error('출생 시간을 입력하거나 모름을 선택해주세요.');
+            throw new Error('출생 시간을 숫자로 입력하거나 모름을 선택해주세요.');
+        }
+
+        if (!birthTimeUnknown && !birthMeridiem) {
+            throw new Error('오전 또는 오후를 선택해주세요.');
         }
 
         if (!birthTimeUnknown && !resolvedBirthTime) {
-            throw new Error('출생 시간은 예: 오전 7:30, 오후 3, 19:20 형태로 입력해주세요.');
+            throw new Error('출생 시간은 숫자만 입력해주세요. 예: 730, 1230, 3');
         }
 
         return {
@@ -2649,15 +2664,8 @@
         birthDateInput.value = birthDatePicker.value;
     });
 
-    birthTimeInput.addEventListener('blur', () => {
-        if (birthTimeInput.disabled) {
-            return;
-        }
-
-        const resolved = parseTypedBirthTime(birthTimeInput.value);
-        if (resolved) {
-            birthTimeInput.value = resolved.birthTime;
-        }
+    birthTimeInput.addEventListener('input', () => {
+        birthTimeInput.value = formatBirthTimeDigitsForInput(birthTimeInput.value);
     });
 
     document.querySelectorAll('.tab').forEach(tab => {
