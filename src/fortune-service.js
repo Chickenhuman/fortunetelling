@@ -56,7 +56,7 @@ export async function analyzeFortune({ profile, type }) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    const matched = /OpenAI API 오류\((\d+)\)/.exec(message);
+    const matched = /API 오류\((\d+)\)/.exec(message);
     const providerStatus = matched ? Number(matched[1]) : 0;
     const isNetworkError =
       message.toLowerCase().includes("fetch failed") ||

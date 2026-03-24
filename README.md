@@ -11,7 +11,7 @@
 - 결제 UI: 크레딧 요금제 선택, 결제(mock checkout/confirm), 지갑/결제내역/거래내역 조회
 - 광고 UI: 입력/결과/히스토리/결제 화면 광고 슬롯 + 무료/유료(결제 사용자) 분기
 - 백엔드: 분석/인증/히스토리/결제/광고 API 제공
-- AI 제공자: `OpenAI` 우선, `mock` 제공자 포함(멀티모델 확장 구조)
+- AI 제공자: `OpenAI`, `Gemini`, `mock` 제공자 포함(선택형 확장 구조)
 - 사주 엔진: `@fullstackfamily/manseryeok` 기반(지원 입력 연도: `1900~2050`)
 - 개인정보 정책: 서버 코드에서 요청 원문 저장/로그 금지
 
@@ -38,16 +38,19 @@ npm test
 ## Render 배포
 - 이 프로젝트는 정적 사이트와 API 서버가 한 프로세스로 동작하므로 GitHub Pages 대신 Render `Web Service`로 배포하는 구성이 더 맞습니다.
 - 루트의 [render.yaml](/workspaces/fortunetelling/render.yaml)을 기준으로 Render에서 `Blueprint` 배포를 만들면 됩니다.
-- 기본 배포 설정은 `AI_PROVIDER=mock` 입니다. 실제 OpenAI를 쓰려면 Render 대시보드에서 `AI_PROVIDER=openai`, `OPENAI_API_KEY`를 추가하세요.
+- `AI_PROVIDER`를 비워두면 앱은 자동으로 `mock`으로 동작합니다. 실제 OpenAI를 쓰려면 Render 대시보드에서 `AI_PROVIDER=openai`, `OPENAI_API_KEY`를 추가하세요.
+- Gemini를 쓰려면 Render 대시보드에서 `AI_PROVIDER=gemini`, `GEMINI_API_KEY`를 추가하세요.
 - 현재 저장소는 파일 기반 저장소(`DATA_DIR`)를 사용하므로 Render 기본 디스크는 재배포 시 초기화될 수 있습니다. 테스트용 배포엔 괜찮지만, 데이터를 유지하려면 추후 persistent disk나 DB로 옮겨야 합니다.
 
 ## 환경변수
 - `PORT`: 기본 `3000`
 - `DATA_DIR`: 사용자 데이터 저장 경로(기본 `./data`)
-- `AI_PROVIDER`: `openai` 또는 `mock`
+- `AI_PROVIDER`: `openai` | `gemini` | `mock`
 - `AUTH_TOKEN_SECRET`: 인증 토큰 서명 키
 - `OPENAI_API_KEY`: OpenAI 사용 시 필수
 - `OPENAI_MODEL`: 기본 `gpt-4.1-mini`
+- `GEMINI_API_KEY`: Gemini 사용 시 필수
+- `GEMINI_MODEL`: 기본 `gemini-2.0-flash`
 
 ## API 스펙(초안)
 ### `POST /api/analyze`

@@ -11,11 +11,13 @@ services:
         value: "10000"
       - key: DATA_DIR
         value: ./data
-      - key: AI_PROVIDER
-        value: mock
       - key: AUTH_TOKEN_SECRET
         generateValue: true
       - key: OPENAI_MODEL
         value: gpt-4.1-mini
       - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: GEMINI_API_KEY
         sync: false

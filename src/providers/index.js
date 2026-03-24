@@ -1,8 +1,12 @@
 import { createMockProvider } from "./mock-provider.js";
 import { createOpenAIProvider } from "./openai-provider.js";
+import { createGeminiProvider } from "./gemini-provider.js";
 
 export function createProviderFromEnv(env = process.env) {
-  const resolvedName = (env.AI_PROVIDER || (env.OPENAI_API_KEY ? "openai" : "mock"))
+  const resolvedName = (
+    env.AI_PROVIDER ||
+    (env.OPENAI_API_KEY ? "openai" : env.GEMINI_API_KEY ? "gemini" : "mock")
+  )
     .toLowerCase()
     .trim();
 
@@ -14,6 +18,13 @@ export function createProviderFromEnv(env = process.env) {
     return createOpenAIProvider({
       apiKey: env.OPENAI_API_KEY,
       model: env.OPENAI_MODEL || "gpt-4.1-mini"
+    });
+  }
+
+  if (resolvedName === "gemini") {
+    return createGeminiProvider({
+      apiKey: env.GEMINI_API_KEY,
+      model: env.GEMINI_MODEL || "gemini-2.0-flash"
     });
   }
 
