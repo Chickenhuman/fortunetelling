@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: fortunetelling
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: DATA_DIR
+        value: ./data
+      - key: AI_PROVIDER
+        value: mock
+      - key: AUTH_TOKEN_SECRET
+        generateValue: true
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: OPENAI_API_KEY
+        sync: false

@@ -35,6 +35,12 @@ http://localhost:3000
 npm test
 ```
 
+## Render 배포
+- 이 프로젝트는 정적 사이트와 API 서버가 한 프로세스로 동작하므로 GitHub Pages 대신 Render `Web Service`로 배포하는 구성이 더 맞습니다.
+- 루트의 [render.yaml](/workspaces/fortunetelling/render.yaml)을 기준으로 Render에서 `Blueprint` 배포를 만들면 됩니다.
+- 기본 배포 설정은 `AI_PROVIDER=mock` 입니다. 실제 OpenAI를 쓰려면 Render 대시보드에서 `AI_PROVIDER=openai`, `OPENAI_API_KEY`를 추가하세요.
+- 현재 저장소는 파일 기반 저장소(`DATA_DIR`)를 사용하므로 Render 기본 디스크는 재배포 시 초기화될 수 있습니다. 테스트용 배포엔 괜찮지만, 데이터를 유지하려면 추후 persistent disk나 DB로 옮겨야 합니다.
+
 ## 환경변수
 - `PORT`: 기본 `3000`
 - `DATA_DIR`: 사용자 데이터 저장 경로(기본 `./data`)
